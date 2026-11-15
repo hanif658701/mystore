@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>মেসার্স ফুল এন্টারপ্রাইজ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--g1:#0b3d2e;--g2:#14a36b;--bg:#eef4f1;--red:#e53935;--grn:#16a34a;--ink:#16261f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Noto Sans Bengali','Hind Siliguri',sans-serif;font-weight:500;background:var(--bg);color:var(--ink)}
+[hidden]{display:none!important}
+header{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g1),var(--g2),#0e7c5a);background-size:200% 200%;animation:flow 10s ease infinite;color:#fff;text-align:center;padding:26px 16px 52px}
+@keyframes flow{50%{background-position:100% 50%}}
+header i{position:absolute;border-radius:50%;background:#ffffff18;animation:float 8s ease-in-out infinite}
+header i:nth-child(1){width:140px;height:140px;left:-30px;top:-40px}
+header i:nth-child(2){width:90px;height:90px;right:8%;top:20px;animation-delay:-3s}
+header i:nth-child(3){width:60px;height:60px;left:30%;bottom:-20px;animation-delay:-5s}
+@keyframes float{50%{transform:translateY(18px) scale(1.1)}}
+header h1{margin:0;font-size:30px;position:relative;animation:drop .8s both}
+header p{margin:3px 0 0;opacity:.93;position:relative;animation:drop .8s .15s both}
+@keyframes drop{from{opacity:0;transform:translateY(-14px)}}
+.stats{display:flex;gap:12px;max-width:900px;margin:-34px auto 0;padding:0 12px;position:relative}
+.stat{flex:1;background:#fff;border-radius:16px;padding:14px 8px;text-align:center;box-shadow:0 8px 24px #0b3d2e22;animation:rise .7s both;transition:.25s}
+.stat:nth-child(2){animation-delay:.12s}.stat:hover{transform:translateY(-4px)}
+.stat span{font-size:14px;color:#5b6b63}.stat b{display:block;font-size:24px;margin-top:2px}
+.due b{color:var(--red)}.paid b{color:var(--grn)}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+main{max-width:900px;margin:18px auto;padding:0 12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input,select,button{font:inherit;padding:11px 13px;border:1.5px solid #d3ddd8;border-radius:12px;outline:0;transition:.2s}
+input:focus{border-color:var(--g2);box-shadow:0 0 0 4px #14a36b22}
+.bar input[type=search]{flex:1;min-width:200px}
+button{background:linear-gradient(135deg,var(--g2),#0e8a5b);color:#fff;border:0;cursor:pointer;font-weight:600;box-shadow:0 4px 12px #14a36b44}
+button:hover{transform:translateY(-2px)}button:active{transform:scale(.96)}
+button.sec{background:linear-gradient(135deg,#546e7a,#37474f);box-shadow:none}
+button.red{background:linear-gradient(135deg,#ef5350,#c62828);box-shadow:none}
+.chk{display:flex;align-items:center;gap:6px;color:#4b5d54}
+.chk input{width:auto}
+.card{background:#fff;border-radius:16px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 2px 10px #0001;animation:rise .5s both;transition:.25s}
+.card:hover{transform:translateX(6px) scale(1.01);box-shadow:0 8px 22px #0b3d2e22}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px;flex:none}
+.av.big{width:76px;height:76px;font-size:34px;animation:pop .6s both}
+@keyframes pop{from{transform:scale(0) rotate(-90deg)}}
+.info{flex:1;min-width:0}.info small{color:#6b7b73;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.amt{font-weight:700;font-size:18px;white-space:nowrap}
+.prof{animation:slide .45s both}
+@keyframes slide{from{opacity:0;transform:translateX(40px)}}
+.back{margin-bottom:12px;background:#fff;color:var(--g1);box-shadow:0 2px 8px #0001}
+.pcard{background:#fff;border-radius:20px;padding:18px;display:flex;gap:16px;align-items:center;box-shadow:0 6px 20px #0b3d2e1c}
+.pcard h2{margin:0}.pcard p{margin:2px 0;color:#455a50}
+.tag{display:inline-block;background:#e6f4ee;color:var(--g1);padding:2px 10px;border-radius:20px;font-size:13px;margin-top:4px}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.s3 div{background:#fff;border-radius:14px;padding:12px 4px;text-align:center;box-shadow:0 2px 10px #0001;animation:rise .6s both}
+.s3 div:nth-child(2){animation-delay:.1s}.s3 div:nth-child(3){animation-delay:.2s}
+.s3 span{font-size:13px;color:#5b6b63}.s3 b{display:block;font-size:19px}
+.panel{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px #0001}
+.panel h4{margin:0 0 8px}
+.row{display:flex;gap:8px;margin:6px 0}.row>*{flex:1;min-width:0}
+.panel input{width:100%;margin:4px 0}
+.ent{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px dashed #dde6e1;animation:rise .4s both}
+.ent:last-child{border:0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.ent .l{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.ent a{color:#999;text-decoration:none;padding:4px 8px}
+.modal{position:fixed;inset:0;background:#0b3d2e99;backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;z-index:5;animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.box{background:#fff;border-radius:20px;padding:18px;width:100%;max-width:480px;margin-top:8vh;animation:pop2 .35s both}
+@keyframes pop2{from{opacity:0;transform:scale(.85) translateY(20px)}}
+.box input{width:100%;margin:5px 0}
+#login{max-width:360px;margin:-30px auto 0;background:#fff;padding:24px;border-radius:20px;box-shadow:0 12px 30px #0b3d2e30;position:relative;animation:rise .7s both}
+#login input{width:100%;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16261f;color:#fff;padding:11px 20px;border-radius:30px;z-index:9;animation:rise .3s both}
+.avl{position:relative;cursor:pointer;flex:none}
+.cam{position:absolute;right:-4px;bottom:-4px;background:#fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;box-shadow:0 2px 6px #0003;font-size:14px}
+img.av{display:block;object-fit:cover;background:#ddd}
+textarea{width:100%;font:inherit;padding:11px 13px;border:1.5px solid #d3ddd8;border-radius:12px;outline:0;resize:vertical;margin:6px 0}
+textarea:focus{border-color:var(--g2);box-shadow:0 0 0 4px #14a36b22}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{padding:6px 10px;font-size:14px}
+.blist{max-height:46vh;overflow:auto;margin:8px 0;border:1px solid #e3ece7;border-radius:12px;padding:4px 10px}
+.bi{padding:7px 0;border-bottom:1px dashed #e3ece7}.bi input{width:auto!important;margin:0!important}
+.tabs{display:flex;gap:8px;max-width:900px;margin:14px auto 0;padding:0 12px}
+.tab{flex:1;background:#fff;color:var(--g1);box-shadow:0 2px 8px #0001;padding:10px 4px}
+.tab.on{background:linear-gradient(135deg,var(--g2),#0e8a5b);color:#fff}
+.panel td,.panel th{padding:7px 6px;text-align:left;border-bottom:1px solid #e3ece7}
+.qty{display:inline-flex;align-items:center;gap:6px}.qty button{padding:2px 10px;border-radius:8px}
+.mt{width:100%;border-collapse:collapse;font-size:13px}.mt td,.mt th{border:1px solid #bbb;padding:4px;text-align:left}
+.panel td,.mt td,.ent b,.card b{font-weight:700}
+.cred{background:#e8f5ee;border-radius:12px;padding:10px 12px;text-align:center;margin-bottom:14px;font-size:14px;line-height:1.6}
+.cred small{display:block;color:#4b5d54}.cred b{display:block;font-size:19px;color:var(--g1)}.cred a{color:var(--g1);font-weight:700;text-decoration:none}
+footer{max-width:900px;margin:26px auto 0;padding:0 12px 28px}
+footer .cred{margin:0;background:#fff;box-shadow:0 2px 10px #0001;padding:14px}
+footer h4{margin:0 0 6px;color:var(--g1)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.pc{background:#fff;border-radius:18px;padding:16px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;box-shadow:0 2px 10px #0001;animation:rise .5s both;transition:.25s}
+.pc:hover{transform:translateY(-5px);box-shadow:0 10px 24px #0b3d2e22}
+.pc .av{margin-bottom:6px}.pc small{color:#6b7b73;font-size:13px}.pc b{font-size:17px}
+.nt{font-size:14px;color:#5b6b63;margin:0 0 8px}
+#pr{display:none}
+.salegrid{display:block}
+.memoCol{margin-top:12px}
+@media(min-width:560px){.salegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.memoCol{margin-top:0;position:sticky;top:12px}}
+@media print{body>*:not(#pr){display:none!important}#pr{display:block}table{width:100%;border-collapse:collapse}td,th{border:1px solid #444;padding:4px;font-size:13px;text-align:left}}
+.box.wide{max-width:720px}
+@media(max-width:480px){header h1{font-size:24px}.stat b{font-size:16px}.stat span{font-size:12px}.s3 b{font-size:16px}}
+</style>
+</head>
+<body>
+
+<header><i></i><i></i><i></i>
+  <h1>মেসার্স ফুল এন্টারপ্রাইজ</h1>
+  <p>পরিচালক: মোঃ শামসুজ্জোহা বিপ্লব খান</p>
+  <p>আঝইর বাজার, নাচোল, চাঁপাইনবাবগঞ্জ</p>
+</header>
+
+<div id="login" hidden>
+  <div class="cred"><small>এই ওয়েবসাইটটি তৈরি করেছেন</small><b>মোঃ আবু হানিফ</b>আপনার ব্যবসা প্রতিষ্ঠানের জন্য ওয়েব এপ্লিকেশন তৈরি করতে চাইলে যোগাযোগ করুন <a href="tel:01722658701">০১৭২২৬৫৮৭০১</a></div>
+  <h3 style="margin-top:0">🔐 লগইন করুন</h3>
+  <input id="em" type="email" placeholder="ইমেইল">
+  <input id="pw" type="password" placeholder="পাসওয়ার্ড" onkeydown="if(event.key==='Enter')doLogin()">
+  <button onclick="doLogin()" style="width:100%;margin-top:6px">লগইন</button>
+  <p id="lerr" style="color:#c62828;margin-bottom:0"></p>
+</div>
+
+<div id="app" hidden>
+  <div class="stats">
+    <div class="stat"><span>মোট বিক্রয়িত পণ্যের মূল্য</span><b id="sSale">৳ ০</b></div>
+    <div class="stat due"><span>মোট বাকি টাকা</span><b id="tDue">৳ ০</b></div>
+    <div class="stat paid"><span>মোট নগদ বিক্রি</span><b id="sCash">৳ ০</b></div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-v="list" onclick="location.hash=''">📒 বকেয়া</button>
+    <button class="tab" data-v="sale" onclick="location.hash='sale'">🛒 বিক্রয়</button>
+    <button class="tab" data-v="prod" onclick="location.hash='prod'">📦 পণ্য</button>
+    <button class="tab" data-v="bill" onclick="location.hash='bill'">💰 বিল আদায়</button>
+  </div>
+  <main>
+    <div id="vList">
+      <div class="bar">
+        <input type="search" id="q" placeholder="🔎 নাম, ডাকনাম বা ফোন দিয়ে খুঁজুন" oninput="renderList()">
+        <button id="vbtn" onclick="toggleAll()">👥 কাস্টমার লিস্ট ভিউ</button>
+        <button onclick="newC()">+ নতুন কাস্টমার</button>
+        <button class="sec" onclick="pdf()">📄 বকেয়া তালিকা PDF</button>
+        <button class="sec" onclick="openBulk()">📨 বাল্ক SMS</button>
+        <button class="sec" onclick="openSet()">⚙️ সেটিং</button>
+        <button class="red" onclick="auth.signOut()">লগআউট</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="onlyDue" onchange="renderList()"> শুধু বকেয়াদার দেখান</label>
+      <p id="cnt" style="color:#6b7b73"></p>
+      <div id="list"></div>
+    </div>
+    <div id="vProf" hidden></div>
+    <div id="vSale" hidden><div class="salegrid"><div>
+      <div class="panel"><h4>১. কাস্টমার খুঁজুন</h4>
+        <input id="sq" type="search" placeholder="🔎 নাম, ডাকনাম বা ফোন নাম্বার" oninput="rSq()"><div id="sres"></div><div id="ssel"></div></div>
+      <div class="panel"><h4>২. পণ্য খুঁজে যোগ করুন</h4>
+        <input id="pq" type="search" placeholder="🔎 পণ্যের নাম" oninput="rPq()"><div id="pres"></div></div>
+</div><div class="memoCol"><div class="panel"><h4>৩. ক্যাশ মেমো / বিক্রয়ের তালিকা</h4><div id="cart"></div></div></div></div>
+    </div>
+    <div id="vBill" hidden></div>
+    <div id="vProd" hidden>
+      <div class="panel"><h4>📂 ফাইল থেকে পণ্য আপলোড (Word / PDF)</h4>
+        <p class="nt">প্রতিটি পণ্য আলাদা লাইনে বা টেবিলের আলাদা সারিতে থাকবে।<br>ফরম্যাট: <b>ক্রমিক নং | পণ্যের নাম | ওজন | দাম</b></p>
+        <input type="file" id="pf" accept=".docx,.pdf" onchange="upProd(this)">
+        <label class="chk" style="margin-top:6px"><input type="checkbox" id="pclr" style="width:auto"> আগের সব পণ্য মুছে নতুন তালিকা বসান</label>
+        <div id="pmsg"></div></div>
+      <div class="panel"><h4>➕ হাতে পণ্য যোগ</h4>
+        <div class="row"><input id="an" placeholder="পণ্যের নাম"><input id="aw" placeholder="ওজন (যেমন ১ কেজি)"><input id="ap" type="number" inputmode="numeric" placeholder="দাম"></div>
+        <input id="ak" placeholder="ডাকনাম (ঐচ্ছিক, শুধু খোঁজার জন্য)"><button style="width:100%" onclick="addProd()">যোগ করুন</button></div>
+      <div class="panel"><h4>📦 পণ্য তালিকা <small id="pc" style="color:#6b7b73"></small></h4>
+        <input id="pfq" type="search" placeholder="🔎 খুঁজুন" oninput="rProd()"><div id="plist" style="overflow-x:auto"></div></div>
+    </div>
+  </main>
+</div>
+
+<div id="mod" class="modal" hidden></div>
+<div id="pr"></div>
+<footer><div class="cred"><h4>📞 যোগাযোগ</h4><small>এই ওয়েবসাইটটি তৈরি করেছেন</small><b>মোঃ আবু হানিফ</b>আপনার ব্যবসা প্রতিষ্ঠানের জন্য ওয়েব এপ্লিকেশন তৈরি করতে চাইলে যোগাযোগ করুন <a href="tel:01722658701">০১৭২২৬৫৮৭০১</a></div></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDHAo_Jdz-91vSP5-3r5y40pfvkvb6xDxg",
+  authDomain: "mssfull-ec549.firebaseapp.com",
+  projectId: "mssfull-ec549",
+  storageBucket: "mssfull-ec549.firebasestorage.app",
+  messagingSenderId: "234580122057",
+  appId: "1:234580122057:web:aa4a1ffd6f83da8bf1b018",
+  measurementId: "G-X2MH1QC577"
+};
+const SHOP = "মেসার্স ফুল এন্টারপ্রাইজ", OWNER = "মোঃ শামসুজ্জোহা বিপ্লব খান";
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+const DEF = "প্রিয় {নাম},\nআপনার মোট বিল: {মোট_বিল} টাকা\nএ পর্যন্ত জমা: {জমা} টাকা\nবর্তমান বকেয়া: {বাকি} টাকা\n\nদয়া করে আপনার বকেয়া বিল গুলো আগামী ডিসেম্বর মাসের মধ্যে পরিশোধ করুন।";
+let C = [], BQ = null, TPL = (() => { try { return localStorage.getItem('tpl'); } catch (e) {} })() || DEF;
+const fill = (c, t = TPL) => t.split('{নাম}').join(c.name).split('{মোট_বিল}').join(num(sum(c, 'due'))).split('{জমা}').join(num(sum(c, 'paid'))).split('{বাকি}').join(num(bal(c))) + `\n\n${SHOP}\nপরিচালক: ${OWNER}`;
+function loadSet() { db.collection('settings').doc('sms').onSnapshot(d => { if (d.exists && d.data().tpl) TPL = d.data().tpl; }, () => {});
+  db.collection('settings').doc('memotpl').onSnapshot(d => { if (d.exists) MT = { ...DM, ...d.data() }; }, () => {});
+}
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const num = n => Number(n).toLocaleString('bn-BD');
+const bn = n => '৳ ' + num(n);
+const memosOf = c => c.memos || [];
+const isCashM = m => !!m.cash || m.added === false;
+const sum = (c, t) => (c.entries || []).filter(x => x.t === t).reduce((a, x) => a + x.a, 0);
+const bal = c => sum(c, 'due') - sum(c, 'paid');
+const today = () => new Date().toISOString().slice(0, 10);
+const COL = ['#e57373','#ba68c8','#7986cb','#4fc3f7','#4db6ac','#81c784','#ffb74d','#a1887f','#f06292'];
+const color = s => COL[[...String(s)].reduce((a, ch) => a + ch.charCodeAt(0), 0) % COL.length];
+const av = (c, big) => c.photo ? `<img class="av ${big ? 'big' : ''}" src="${c.photo}" alt="">` : `<div class="av ${big ? 'big' : ''}" style="background:${color(c.name)}">${esc((c.name || '?').trim().charAt(0))}</div>`;
+const curId = () => location.hash.startsWith('#c=') ? location.hash.slice(3) : null;
+
+function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
+
+function countUp(el, to, f) {
+  const from = el._v || 0; el._v = to; const t0 = performance.now();
+  (function step(t) {
+    const p = Math.min((t - t0) / 700, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (f || bn)(Math.round(from + (to - from) * e));
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+auth.onAuthStateChanged(u => {
+  $('login').hidden = !!u; $('app').hidden = !u;
+  if (u) loadSet(), loadProd(), loadComp(), db.collection('customers').orderBy('name').onSnapshot(s => {
+    C = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    route(true);
+  }, e => toast('ডাটা লোড হয়নি: ' + e.code));
+});
+window.onhashchange = () => route(false);
+
+function doLogin() {
+  auth.signInWithEmailAndPassword($('em').value.trim(), $('pw').value)
+    .catch(() => $('lerr').textContent = 'ইমেইল বা পাসওয়ার্ড ভুল');
+}
+
+function route(refresh) {
+  countUp($('sSale'), C.reduce((a, c) => a + memosOf(c).reduce((b, m) => b + (m.total || 0), 0), 0));
+  countUp($('tDue'), C.reduce((a, c) => a + bal(c), 0));
+  countUp($('sCash'), C.reduce((a, c) => a + memosOf(c).filter(isCashM).reduce((b, m) => b + (m.total || 0), 0), 0));
+  const id = curId(), h = location.hash, v = id ? 'prof' : h === '#sale' ? 'sale' : h === '#prod' ? 'prod' : h === '#bill' ? 'bill' : 'list';
+  ['list', 'sale', 'prod', 'prof', 'bill'].forEach(k => $('v' + k[0].toUpperCase() + k.slice(1)).hidden = k !== v);
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === (v === 'prof' ? 'list' : v)));
+  if (v === 'prof') { if (C.length) openProfile(id, refresh); }
+  else if (v === 'list') renderList();
+  else if (v === 'sale') { rSel(); rPq(); rCart(); }
+  else if (v === 'bill') rBill();
+  else rProd();
+}
+
+let SHOWALL = false;
+function toggleAll() { SHOWALL = !SHOWALL; renderList(); }
+function renderList() {
+  const q = $('q').value.trim().toLowerCase(), od = $('onlyDue').checked;
+  const L = C.filter(c => (!q || mC(c, q)) && (!od || bal(c) > 0));
+  $('vbtn').textContent = SHOWALL ? '🙈 কাস্টমার লিস্ট লুকান' : '👥 কাস্টমার লিস্ট ভিউ';
+  if (!SHOWALL && !q) {
+    $('cnt').textContent = '';
+    $('list').innerHTML = '<p class="nt" style="text-align:center;margin:26px 0">কাস্টমারের নাম, ডাকনাম বা ফোন নাম্বার লিখে খুঁজুন,<br>অথবা "কাস্টমার লিস্ট ভিউ" বাটনে চাপুন।</p>';
+    return;
+  }
+  $('cnt').textContent = `মোট ${num(C.length)} জন কাস্টমার • দেখাচ্ছে ${num(L.length)} জন`;
+  if (!L.length) { $('list').innerHTML = '<p style="text-align:center;color:#888">কোনো কাস্টমার পাওয়া যায়নি</p>'; return; }
+  $('list').innerHTML = SHOWALL
+    ? `<div class="pgrid">${L.map((c, i) => `<div class="pc" style="animation-delay:${Math.min(i, 12) * 40}ms" onclick="location.hash='c=${c.id}'">${av(c, 1)}<b>${esc(c.name)}</b><small>📞 ${esc(c.phone)}</small><small>📍 ${esc(c.address)}</small><div class="amt" style="color:${bal(c) > 0 ? 'var(--red)' : 'var(--grn)'}">${bn(bal(c))}</div></div>`).join('')}</div>`
+    : L.map((c, i) => `<div class="card" style="animation-delay:${Math.min(i, 12) * 40}ms" onclick="location.hash='c=${c.id}'">
+    ${av(c)}<div class="info"><b>${esc(c.name)}</b>${c.nk ? ` <span class="tag">${esc(c.nk)}</span>` : ''}<small>📞 ${esc(c.phone)} • 📍 ${esc(c.address)}</small></div>
+    <div class="amt" style="color:${bal(c) > 0 ? 'var(--red)' : 'var(--grn)'}">${bn(bal(c))}</div></div>`).join('');
+}
+
+function openProfile(id, refresh) {
+  const c = C.find(x => x.id === id);
+  if (!c) { location.hash = ''; return; }
+  const keep = refresh && $('vProf').firstChild ? { d: $('ed')?.value, a: $('ea')?.value, n: $('en')?.value } : null;
+  const ents = (c.entries || []).map((x, i) => ({ ...x, i })).sort((a, b) => b.d.localeCompare(a.d) || b.i - a.i);
+  $('vProf').innerHTML = `<div class="prof">
+    <button class="back" onclick="location.hash=''">← সব কাস্টমার</button>
+    <div class="pcard"><label class="avl" title="ছবি তুলুন বা বাছুন">${av(c, 1)}<span class="cam">📷</span><input type="file" accept="image/*" hidden onchange="upPhoto(this)"></label><div><h2>${esc(c.name)}</h2><p>📞 ${esc(c.phone)}</p><p>📍 ${esc(c.address)}</p><span class="tag">আইডি: ${c.id.slice(0, 6).toUpperCase()}</span>${c.nk ? ` <span class="tag">ডাকনাম: ${esc(c.nk)}</span>` : ''}${c.photo ? `<br><a href="#c=${c.id}" onclick="rmPhoto();return false" style="font-size:13px;color:#c62828">ছবি মুছুন</a>` : ''}</div></div>
+    <div class="s3">
+      <div><span>মোট বিল</span><b>${bn(sum(c, 'due'))}</b></div>
+      <div><span>জমা</span><b style="color:var(--grn)">${bn(sum(c, 'paid'))}</b></div>
+      <div><span>বাকি</span><b style="color:var(--red)">${bn(bal(c))}</b></div>
+    </div>
+    <div class="panel"><h4>➕ নতুন হিসাব যোগ করুন</h4>
+      <div class="row"><input id="ed" type="date" value="${keep?.d || today()}"><input id="ea" type="number" inputmode="numeric" placeholder="টাকা" value="${keep?.a || ''}"></div>
+      <input id="en" placeholder="নোট (ঐচ্ছিক)" value="${esc(keep?.n || '')}">
+      <div class="row"><button class="red" onclick="addE('due')">+ বকেয়া</button><button onclick="addE('paid')">+ জমা</button></div>
+    </div>
+    <button style="width:100%;margin-bottom:8px" onclick="newMemo()">🧾 নতুন মেমো করুন</button>
+    <div class="row"><button onclick="sms()">📩 SMS পাঠান</button><button class="sec" onclick="location.href='tel:${esc(c.phone)}'">📞 কল করুন</button></div>
+    <button class="sec" style="width:100%;margin-top:8px" onclick="pdfC()">📄 এই কাস্টমারের PDF ডাউনলোড</button>
+    <button class="sec" style="width:100%;margin-top:8px" onclick="editC()">✏️ কাস্টমারের তথ্য এডিট</button>
+    <div class="panel" style="margin-top:12px"><h4>📒 হিসাবের তালিকা</h4>
+    ${ents.map((x, k) => `<div class="ent" style="animation-delay:${Math.min(k, 10) * 35}ms"><div class="l"><span class="dot" style="background:${x.t === 'due' ? 'var(--red)' : 'var(--grn)'}"></span><div><b>${x.t === 'due' ? 'বকেয়া' : 'জমা'}</b> <small style="color:#6b7b73">${x.d} ${esc(x.n)}</small></div></div>
+      <b style="color:${x.t === 'due' ? 'var(--red)' : 'var(--grn)'}">${bn(x.a)}</b><a href="#c=${c.id}" onclick="delE(${x.i});return false">✕</a></div>`).join('') || '<small style="color:#888">কোনো হিসাব নেই</small>'}
+    </div>
+    <div class="panel"><h4>🧾 ক্যাশ মেমো</h4>${(c.memos || []).slice().reverse().map(m => `<div class="ent" style="cursor:pointer" onclick="showMemo(C.find(x => x.id === '${c.id}').memos.find(z => z.no === ${m.no}), true)"><div class="l"><div><b>মেমো নং ${num(m.no)}</b> <small style="color:#6b7b73">${bd(m.date)}</small></div></div><b>${bn(m.total)}</b></div>`).join('') || '<small style="color:#888">কোনো মেমো নেই</small>'}</div>
+    <button class="red" style="width:100%" onclick="delC()">🗑 কাস্টমার মুছুন</button></div>`;
+  if (!refresh) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function newC() {
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">👤 নতুন কাস্টমার</h3>
+    <input id="n1" placeholder="নাম"><input id="n2" type="tel" placeholder="মোবাইল নাম্বার"><input id="n3" placeholder="ঠিকানা"><input id="n4" placeholder="ডাকনাম (ঐচ্ছিক, যেমন hanif)">
+    <div class="row"><button onclick="saveC()">সেভ করুন</button><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div>
+    <hr style="border:0;border-top:1px dashed #cfd9d4;margin:14px 0">
+    <h4 style="margin:0 0 6px">📂 ফাইল থেকে একসাথে কাস্টমার যোগ</h4>
+    <p class="nt">Word (.docx) বা PDF ফাইল দিন। শুধু নাম, ঠিকানা ও মোবাইল নাম্বার নেওয়া হবে। বকেয়া বা জমার টাকা বাদ যাবে। প্রতিজনের প্রোফাইল নিজে থেকেই তৈরি হবে।</p>
+    <input type="file" accept=".docx,.pdf" onchange="upCust(this)"><div id="cmsg"></div></div>`;
+}
+
+async function saveC() {
+  const name = $('n1').value.trim(), phone = eng($('n2').value.trim()), address = $('n3').value.trim();
+  if (!name || !phone) return toast('নাম ও মোবাইল নাম্বার দিন');
+  const r = await db.collection('customers').add({ name, phone, address, entries: [], nk: ($("n4") ? $("n4").value.trim() : ""), created: Date.now() });
+  $('mod').hidden = true; toast('কাস্টমার যোগ হয়েছে ✔'); location.hash = 'c=' + r.id;
+}
+
+function addE(t) {
+  const c = C.find(x => x.id === curId()), a = parseFloat($('ea').value);
+  if (!a || a <= 0) return toast('সঠিক টাকার পরিমাণ দিন');
+  const entries = [...(c.entries || []), { d: $('ed').value || today(), t, a, n: $('en').value.trim() }];
+  db.collection('customers').doc(c.id).update({ entries }).then(() => { toast(t === 'due' ? 'বকেয়া যোগ হয়েছে ✔' : 'জমা যোগ হয়েছে ✔'); $('ea').value = ''; $('en').value = ''; });
+}
+function delE(i) {
+  if (!confirm('এই হিসাবটি মুছবেন?')) return;
+  const c = C.find(x => x.id === curId());
+  db.collection('customers').doc(c.id).update({ entries: c.entries.filter((_, k) => k !== i) });
+}
+function delC() {
+  if (!confirm('এই কাস্টমার ও তার সব হিসাব মুছে যাবে। নিশ্চিত?')) return;
+  db.collection('customers').doc(curId()).delete(); location.hash = ''; toast('কাস্টমার মুছে গেছে');
+}
+
+function sms() {
+  const c = C.find(x => x.id === curId());
+  location.href = 'sms:' + c.phone + '?body=' + encodeURIComponent(fill(c));
+}
+
+function upPhoto(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const id = curId(), r = new FileReader(), img = new Image();
+  r.onload = () => { img.src = r.result; };
+  img.onload = () => {
+    const k = Math.min(1, 320 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+    cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    db.collection('customers').doc(id).update({ photo: cv.toDataURL('image/jpeg', .72) }).then(() => toast('ছবি সেভ হয়েছে ✔'));
+  };
+  r.readAsDataURL(f);
+}
+function rmPhoto() { if (confirm('ছবিটি মুছবেন?')) db.collection('customers').doc(curId()).update({ photo: firebase.firestore.FieldValue.delete() }); }
+
+function openSet() { openSmsSet(); }
+function setTabs(a) { return `<h3 style="margin-top:0">⚙️ সেটিং</h3><div class="row"><button class="${a === 'sms' ? '' : 'sec'}" onclick="openSmsSet()">📩 SMS</button><button class="${a === 'memo' ? '' : 'sec'}" onclick="openMemoSet()">🧾 ক্যাশ মেমো</button><button class="${a === 'comp' ? '' : 'sec'}" onclick="openCompSet()">🏭 কোম্পানি ও স্টক</button><button class="${a === 'profit' ? '' : 'sec'}" onclick="openProfitSet()">💰 প্রফিট</button></div>`; }
+function openProfitSet() {
+  const T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP), SS = T(cSumS), PF = T(cProf);
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box wide">${setTabs('profit')}
+    <div class="s3"><div><span>মোট ক্রয় (TP)</span><b>${bn(SP)}</b></div><div><span>মোট বিক্রয়</span><b>${bn(SS)}</b></div><div><span>মোট প্রফিট</span><b style="color:${profC(PF)}">${bn(PF)}</b></div></div>
+    <div class="panel"><h4>কোম্পানি অনুযায়ী</h4>
+      ${CO.map(c => `<div class="ent"><div class="l"><div><b>${esc(c.name)}</b></div></div><small style="color:#6b7b73">ক্রয় ${bn(cSumP(c))} • বিক্রয় ${bn(cSumS(c))}</small><b style="color:${profC(cProf(c))}">লাভ ${bn(cProf(c))}</b></div>`).join('') || '<small style="color:#888">এখনো কোনো কোম্পানি নেই</small>'}
+    </div>
+    <div class="row"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+}
+function openSmsSet() {
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box">${setTabs('sms')}
+    <p style="margin:0 0 6px;color:#5b6b63;font-size:14px">মেসেজ নিজের মতো লিখুন। নিচের চিহ্নে চাপলে কার্সরের জায়গায় বসবে।</p>
+    <div class="chips">${['নাম', 'মোট_বিল', 'জমা', 'বাকি'].map(k => `<button class="sec" onclick="ins('{${k}}')">{${k}}</button>`).join('')}</div>
+    <textarea id="tpl" rows="9" oninput="prev()">${esc(TPL)}</textarea>
+    <small style="color:#5b6b63">প্রতিটি মেসেজের শেষে প্রতিষ্ঠানের নাম ও পরিচালকের নাম নিজে থেকেই যুক্ত হবে।</small>
+    <div class="panel" style="margin:8px 0;background:#f4f8f6"><b>প্রিভিউ:</b><div id="prv" style="white-space:pre-wrap;margin-top:4px"></div></div>
+    <div class="row"><button onclick="saveSet()">সেভ করুন</button><button class="sec" onclick="resetSet()">মূল লেখা</button><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+  prev();
+}
+function ins(t) { const e = $('tpl'), p = e.selectionStart || 0; e.value = e.value.slice(0, p) + t + e.value.slice(e.selectionEnd || p); e.focus(); e.selectionStart = e.selectionEnd = p + t.length; prev(); }
+function prev() { $('prv').textContent = fill({ name: 'রহিম', entries: [{ t: 'due', a: 5000 }, { t: 'paid', a: 2000 }] }, $('tpl').value); }
+function resetSet() { $('tpl').value = DEF; prev(); }
+function saveSet() {
+  TPL = $('tpl').value.trim() || DEF;
+  try { localStorage.setItem('tpl', TPL); } catch (e) {}
+  db.collection('settings').doc('sms').set({ tpl: TPL }).then(() => toast('সেটিং সেভ হয়েছে ✔'), () => toast('শুধু এই ডিভাইসে সেভ হয়েছে (Firestore Rules আপডেট করুন)'));
+  $('mod').hidden = true;
+}
+
+function openBulk() {
+  const L = C.filter(c => bal(c) > 0 && c.phone);
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">📨 বাল্ক SMS</h3>
+    <label class="chk"><input type="checkbox" checked onchange="document.querySelectorAll('.bk').forEach(x=>x.checked=this.checked);bcnt()"> সব বকেয়াদার (${num(L.length)} জন)</label>
+    <div class="blist">${L.map(c => `<label class="chk bi"><input type="checkbox" class="bk" value="${c.id}" checked onchange="bcnt()"><span>${esc(c.name)}</span><b style="margin-left:auto;color:var(--red)">${bn(bal(c))}</b></label>`).join('') || '<p>কোনো বকেয়াদার নেই</p>'}</div>
+    <p id="bc" style="margin:8px 0"></p>
+    <div class="row"><button onclick="startBulk()">শুরু করুন</button><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
+  bcnt();
+}
+function bcnt() { $('bc').textContent = num(document.querySelectorAll('.bk:checked').length) + ' জন বাছাই করা হয়েছে'; }
+function startBulk() {
+  const ids = [...document.querySelectorAll('.bk:checked')].map(x => x.value);
+  if (!ids.length) return toast('কাউকে বাছাই করুন');
+  BQ = { ids, i: 0, sent: 0 }; bulkStep();
+}
+function bulkStep() {
+  if (BQ.i >= BQ.ids.length) { $('mod').innerHTML = `<div class="box" style="text-align:center"><h3>✅ শেষ!</h3><p>${num(BQ.sent)} জনের মেসেজ পাঠানো হয়েছে।</p><button onclick="$('mod').hidden=true">বন্ধ করুন</button></div>`; return; }
+  const c = C.find(x => x.id === BQ.ids[BQ.i]);
+  if (!c) { BQ.i++; return bulkStep(); }
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">📨 ${num(BQ.i + 1)} / ${num(BQ.ids.length)}</h3>
+    <div style="height:8px;background:#e3ece7;border-radius:8px;overflow:hidden"><div style="height:100%;width:${BQ.i / BQ.ids.length * 100}%;background:var(--g2);transition:.4s"></div></div>
+    <div class="card" style="margin-top:12px;cursor:default">${av(c)}<div class="info"><b>${esc(c.name)}</b><small>📞 ${esc(c.phone)}</small></div><div class="amt" style="color:var(--red)">${bn(bal(c))}</div></div>
+    <div class="panel" style="white-space:pre-wrap;font-size:14px">${esc(fill(c))}</div>
+    <button style="width:100%" onclick="bulkSend()">📩 SMS পাঠান ও পরের জন</button>
+    <div class="row"><button class="sec" onclick="BQ.i++;bulkStep()">বাদ দিন →</button><button class="red" onclick="$('mod').hidden=true">থামান</button></div></div>`;
+}
+function bulkSend() {
+  const c = C.find(x => x.id === BQ.ids[BQ.i]); BQ.i++; BQ.sent++; bulkStep();
+  location.href = 'sms:' + c.phone + '?body=' + encodeURIComponent(fill(c));
+}
+
+
+/* ===== বিক্রয়, পণ্য, ক্যাশ মেমো ===== */
+const ADDR = "আঝইর বাজার, নাচোল, চাঁপাইনবাবগঞ্জ";
+const bd = d => d ? String(d).split('-').reverse().join('/').replace(/\d/g, x => '০১২৩৪৫৬৭৮৯'[x]) : '';
+const eng = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+let P = [], cart = [], selC = null, MM = null, DSC = 0;
+
+function loadProd() {
+  db.collection('products').onSnapshot(s => {
+    P = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.sl || 0) - (b.sl || 0));
+    if (!$('vProd').hidden) rProd();
+    if (!$('vSale').hidden) rPq();
+  }, e => toast('পণ্য লোড হয়নি: ' + e.code));
+}
+
+/* পণ্য */
+function rProd() {
+  const q = ($('pfq').value || '').trim();
+  $('pc').textContent = '(মোট ' + num(P.length) + 'টি সেভ আছে)';
+  if (!q) { $('plist').innerHTML = '<p class="nt">পণ্যের নাম (বাংলা বা ইংরেজি ডাকনাম) লিখে খুঁজুন। পণ্যের তালিকা লুকানো থাকে।</p>'; return; }
+  const L = P.filter(x => mP(x, q)).slice(0, 40);
+  $('plist').innerHTML = L.length ? `<table style="width:100%;border-collapse:collapse"><tr><th>ক্রম</th><th>পণ্য</th><th>ওজন</th><th>দাম</th><th></th></tr>${L.map(x => `<tr><td>${num(P.indexOf(x) + 1)}</td><td>${esc(x.n)}${x.nk ? `<br><small style="color:#6b7b73">ডাকনাম: ${esc(x.nk)}</small>` : ''}</td><td>${esc(x.w)}</td><td>${bn(x.p)}</td><td style="white-space:nowrap"><a href="#prod" onclick="editP('${x.id}');return false">✏️</a> <a href="#prod" onclick="delP('${x.id}');return false">✕</a></td></tr>`).join('')}</table>` : '<p class="nt">কোনো পণ্য পাওয়া যায়নি</p>';
+}
+function addProd() {
+  const n = $('an').value.trim(), p = parseFloat(eng($('ap').value));
+  if (!n || !p) return toast('পণ্যের নাম ও দাম দিন');
+  db.collection('products').add({ n, w: $('aw').value.trim(), p, nk: $('ak').value.trim(), sl: Date.now() }).then(() => { $('an').value = $('aw').value = $('ap').value = $('ak').value = ''; toast('পণ্য যোগ হয়েছে ✔'); });
+}
+function editP(id) {
+  const x = P.find(z => z.id === id);
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">✏️ পণ্য এডিট</h3>
+    <label class="nt">পণ্যের নাম (মেমোতে এটাই যাবে)</label><input id="en1" value="${esc(x.n)}">
+    <label class="nt">ওজন / পরিমাণ</label><input id="en2" value="${esc(x.w)}">
+    <label class="nt">দাম (টাকা)</label><input id="en3" type="number" inputmode="numeric" value="${x.p}">
+    <label class="nt">ডাকনাম (শুধু খোঁজার জন্য, মেমোতে আসবে না)</label><input id="en4" value="${esc(x.nk || '')}" placeholder="যেমন: abada">
+    <div class="row"><button onclick="saveP('${id}')">সেভ করুন</button><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
+}
+function saveP(id) {
+  const n = $('en1').value.trim(), p = parseFloat(eng($('en3').value));
+  if (!n || !(p > 0)) return toast('নাম ও সঠিক দাম দিন');
+  db.collection('products').doc(id).update({ n, w: $('en2').value.trim(), p, nk: $('en4').value.trim() }).then(() => { $('mod').hidden = true; toast('পণ্য আপডেট হয়েছে ✔'); });
+}
+function delP(id) { if (confirm('এই পণ্য মুছবেন?')) db.collection('products').doc(id).delete(); }
+async function batchDel(arr) {
+  for (let i = 0; i < arr.length; i += 400) { const b = db.batch(); arr.slice(i, i + 400).forEach(x => b.delete(db.collection('products').doc(x.id))); await b.commit(); }
+}
+
+/* Word / PDF থেকে পণ্য পড়া */
+function parseRows(rows) {
+  const out = [];
+  rows.forEach(r => {
+    let cells = (Array.isArray(r) ? r : String(r).split(/\s*\|\s*|\t|\s{2,}/)).map(x => String(x).trim()).filter(Boolean);
+    if (cells.length < 3) return;
+    if (/^[\d০-৯]+[.)]?$/.test(cells[0]) && cells.length >= 4) cells = cells.slice(1);
+    const p = parseFloat(eng(cells[cells.length - 1]).replace(/[^\d.]/g, ''));
+    if (!p || p <= 0) return;
+    out.push({ n: cells[0], w: cells.slice(1, -1).join(' '), p });
+  });
+  return out;
+}
+async function readDocx(f) {
+  const h = (await mammoth.convertToHtml({ arrayBuffer: await f.arrayBuffer() })).value;
+  const doc = new DOMParser().parseFromString(h, 'text/html');
+  let rows = [...doc.querySelectorAll('tr')].map(tr => [...tr.children].map(td => td.textContent));
+  if (!rows.length) rows = [...doc.querySelectorAll('p')].map(p => p.textContent);
+  return rows;
+}
+async function readPdf(f) {
+  if (!window.pdfjsLib) throw new Error('PDF রিডার লোড হয়নি, ইন্টারনেট চেক করুন');
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    const w = await (await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js')).blob();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(w);
+  }
+  const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise, rows = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const tc = await (await pdf.getPage(i)).getTextContent(), lines = [];
+    tc.items.forEach(it => {
+      if (!it.str.trim()) return;
+      const y = Math.round(it.transform[5] / 3);
+      let l = lines.find(z => Math.abs(z.y - y) <= 1);
+      if (!l) lines.push(l = { y, it: [] });
+      l.it.push(it);
+    });
+    lines.sort((a, b) => b.y - a.y).forEach(l => {
+      l.it.sort((a, b) => a.transform[4] - b.transform[4]);
+      let t = '', e = null;
+      l.it.forEach(it => { const x = it.transform[4], g = e === null ? 0 : x - e; t += (g > 6 ? ' | ' : g > 1 ? ' ' : '') + it.str; e = x + it.width; });
+      rows.push(t);
+    });
+  }
+  return rows;
+}
+async function upProd(inp) {
+  const f = inp.files[0]; if (!f) return;
+  $('pmsg').innerHTML = '<p>ফাইল পড়া হচ্ছে...</p>';
+  try {
+    const L = parseRows(/\.pdf$/i.test(f.name) ? await readPdf(f) : await readDocx(f));
+    if (!L.length) { $('pmsg').innerHTML = '<p style="color:#c62828">কোনো পণ্য পাওয়া যায়নি। ফরম্যাট: ক্রমিক নং | পণ্যের নাম | ওজন | দাম</p>'; inp.value = ''; return; }
+    if (!confirm(num(L.length) + 'টি পণ্য পাওয়া গেছে। যোগ করবেন?\nপ্রথম পণ্য: ' + L[0].n + ' — ' + L[0].w + ' — ' + L[0].p + ' টাকা')) { $('pmsg').innerHTML = ''; inp.value = ''; return; }
+    if ($('pclr').checked) await batchDel(P);
+    const base = Date.now();
+    for (let i = 0; i < L.length; i += 400) { const b = db.batch(); L.slice(i, i + 400).forEach((x, k) => b.set(db.collection('products').doc(), { ...x, sl: base + i + k })); await b.commit(); }
+    $('pmsg').innerHTML = `<p style="color:var(--grn)">✔ ${num(L.length)}টি পণ্য যোগ হয়েছে</p>`;
+  } catch (e) { $('pmsg').innerHTML = '<p style="color:#c62828">ফাইল পড়া যায়নি: ' + esc(e.message) + '</p>'; }
+  inp.value = '';
+}
+
+/* বিক্রয় */
+function rSq() {
+  const q = $('sq').value.trim().toLowerCase();
+  const L = q ? C.filter(c => mC(c, q)).slice(0, 8) : [];
+  $('sres').innerHTML = L.map(c => `<div class="card" onclick="pickC('${c.id}')">${av(c)}<div class="info"><b>${esc(c.name)}</b>${c.nk ? ` <span class="tag">${esc(c.nk)}</span>` : ''}<small>📞 ${esc(c.phone)} • 📍 ${esc(c.address)}</small></div><div class="amt" style="color:var(--red)">${bn(bal(c))}</div></div>`).join('') || (q ? '<p style="color:#888">কোনো কাস্টমার পাওয়া যায়নি</p>' : '');
+}
+function pickC(id) { selC = id; $('sq').value = ''; $('sres').innerHTML = ''; rSel(); }
+function newMemo() {
+  selC = curId(); cart = []; DSC = 0; location.hash = 'sale';
+  toast('কাস্টমার বাছাই হয়েছে — পণ্য যোগ করুন');
+}
+function rSel() {
+  const c = C.find(x => x.id === selC);
+  $('ssel').innerHTML = c ? `<div class="card" style="border:2px solid var(--g2);cursor:default;margin-top:8px">${av(c)}<div class="info"><b>✅ ${esc(c.name)}</b>${c.nk ? ` <span class="tag">${esc(c.nk)}</span>` : ''}<small>📞 ${esc(c.phone)} • 📍 ${esc(c.address)}</small></div><div style="text-align:right"><small>বর্তমান বকেয়া</small><div class="amt" style="color:var(--red)">${bn(bal(c))}</div></div></div>` : '';
+}
+function allProds() {
+  const co = CO.flatMap(c => (c.products || []).map((x, i) => ({ id: 'co|' + c.id + '|' + i, n: x.n, w: x.w, p: x.sp || 0, tp: x.p || 0, nk: x.nk || '', co: c.name, cid: c.id })));
+  return [...P, ...co];
+}
+function stockOf(n) { return CO.reduce((a, c) => a + (c.purchases || []).filter(x => x.n === n).reduce((b, x) => b + x.q, 0), 0); }
+function rPq() {
+  const q = $('pq').value.trim();
+  if (!q) { $('pres').innerHTML = allProds().length ? '<p class="nt">পণ্যের নাম লিখুন (বাংলা অথবা ইংরেজি ডাকনাম, যেমন: abada)</p>' : '<p class="nt">আগে "পণ্য" ট্যাব থেকে পণ্য যোগ করুন</p>'; return; }
+  const L = allProds().filter(x => mP(x, q)).slice(0, 30);
+  $('pres').innerHTML = L.map(x => `<div class="card" onclick="addCart('${x.id}')"><div class="info"><b>${esc(x.n)}</b><small>${esc(x.w)}${x.co ? ' • ' + esc(x.co) : ''}${x.co ? ' • স্টক: ' + num(stockIn(CO.find(z => z.id === x.cid) || {}, x.n)) : ''}</small></div><div class="amt">${x.p ? bn(x.p) : '<small style="color:#c62828">দাম নেই</small>'}</div><button style="padding:6px 14px">+</button></div>`).join('') || '<p class="nt">কোনো পণ্য পাওয়া যায়নি</p>';
+}
+function addCart(id) {
+  const x = allProds().find(z => z.id === id), f = cart.find(c => c.id === id);
+  if (!x.p) return toast('আগে কোম্পানি প্রোফাইলে বিক্রয় মূল্য সেট করুন');
+  if (x.cid) { const sc = stockIn(CO.find(z => z.id === x.cid) || {}, x.n); if (sc - (f ? f.q : 0) <= 0) return toast('স্টকে আর পণ্য নেই'); }
+  f ? f.q++ : cart.push({ id, cid: x.cid || null, n: x.n, w: x.w, p: x.p, tp: x.tp || 0, q: 1 });
+  rCart(); toast(x.n + ' যোগ হয়েছে');
+}
+const cTot = () => cart.reduce((a, c) => a + c.p * c.q, 0);
+function qt(i, d) { cart[i].q += d; if (cart[i].q < 1) cart.splice(i, 1); rCart(); }
+function rCart() {
+  if (!cart.length) { $('cart').innerHTML = '<p style="color:#888">এখনো কোনো পণ্য যোগ হয়নি</p>'; return; }
+  $('cart').innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tr><th>পণ্য</th><th>পরিমাণ</th><th>মোট</th><th></th></tr>${cart.map((c, i) => `<tr><td>${esc(c.n)}<br><small style="color:#6b7b73">${esc(c.w)} × ${bn(c.p)}</small></td>
+    <td><span class="qty"><button class="sec" onclick="qt(${i},-1)">−</button>${num(c.q)}<button onclick="qt(${i},1)">+</button></span></td><td>${bn(c.p * c.q)}</td><td><a href="#sale" onclick="cart.splice(${i},1);rCart();return false">✕</a></td></tr>`).join('')}</table></div>
+    <div id="ctot">${totHTML()}</div><div class="row" style="align-items:center"><label class="chk" style="flex:none">নগদ ছাড় %</label><input type="number" inputmode="decimal" placeholder="০" value="${DSC || ''}" oninput="DSC=parseFloat(eng(this.value))||0;rTot()" style="max-width:120px"></div>
+    
+    <button style="width:100%" onclick="mkMemo()">🧾 ক্যাশ মেমো তৈরি করুন</button>`;
+}
+
+/* ===== বকেয়া বিল পরিশোধ ও রশিদ ===== */
+let BSEL = null;
+function rBill() {
+  const tot = C.reduce((a, c) => a + (c.entries || []).filter(x => x.t === 'paid' && x.rc).reduce((b, x) => b + x.a, 0), 0);
+  $('vBill').innerHTML = `<div class="panel"><h4>💰 বকেয়া বিল পরিশোধ</h4>
+    <p style="margin:0 0 8px;color:#5b6b63">মোট আদায়: <b style="color:var(--grn)">${bn(tot)}</b></p>
+    <input id="bq" type="search" placeholder="🔎 নাম, ডাকনাম বা ফোন নাম্বার" oninput="rBillRes()">
+    <div id="bres"></div><div id="bform"></div></div>`;
+  renderBillForm();
+}
+function rBillRes() {
+  const q = $('bq').value.trim().toLowerCase();
+  const L = q ? C.filter(c => mC(c, q)).slice(0, 8) : [];
+  $('bres').innerHTML = L.map(c => `<div class="card" onclick="pickBill('${c.id}')">${av(c)}<div class="info"><b>${esc(c.name)}</b>${c.nk ? ` <span class="tag">${esc(c.nk)}</span>` : ''}<small>📞 ${esc(c.phone)}</small></div><div class="amt" style="color:${bal(c) > 0 ? 'var(--red)' : 'var(--grn)'}">${bn(bal(c))}</div></div>`).join('') || (q ? '<p style="color:#888">কোনো কাস্টমার পাওয়া যায়নি</p>' : '');
+}
+function pickBill(id) { BSEL = id; $('bq').value = ''; $('bres').innerHTML = ''; renderBillForm(); }
+function renderBillForm() {
+  const c = C.find(x => x.id === BSEL), f = $('bform'); if (!f) return;
+  f.innerHTML = !c ? '' : `<div class="panel" style="margin-top:10px"><h4>${esc(c.name)} — বর্তমান বাকি ${bn(bal(c))}</h4>
+    <div class="row"><input id="bd" type="date" value="${today()}"><input id="ba" type="number" inputmode="decimal" placeholder="আদায়ের টাকা"></div>
+    <input id="bn" placeholder="নোট (ঐচ্ছিক)">
+    <div class="row"><button onclick="payBill()">🧾 রশিদ তৈরি করুন</button><button class="sec" onclick="BSEL=null;renderBillForm()">বাতিল</button></div></div>`;
+}
+async function payBill() {
+  const c = C.find(x => x.id === BSEL); if (!c) return;
+  const a = parseFloat(eng($('ba').value)); if (!(a > 0)) return toast('আদায়ের টাকা দিন');
+  const d = $('bd').value || today(), note = $('bn').value.trim();
+  let no;
+  try {
+    const ref = db.collection('settings').doc('receipt');
+    no = await db.runTransaction(async t => { const dd = await t.get(ref), n = (dd.exists ? dd.data().n : 0) + 1; t.set(ref, { n }); return n; });
+  } catch (e) { no = Date.now() % 1000000; }
+  const entries = [...(c.entries || []), { d, t: 'paid', a, n: 'বিল পরিশোধ #' + num(no), rc: true, no }];
+  try { await db.collection('customers').doc(c.id).update({ entries }); } catch (e) { return toast('সেভ হয়নি: ' + e.code); }
+  printDoc(receiptHTML({ no, d, a, note, bal: sum({ entries }, 'due') - sum({ entries }, 'paid'), c: { n: c.name, ph: c.phone, a: c.address } }), 'রশিদ-' + num(no));
+  BSEL = null; toast('রশিদ তৈরি হয়েছে ✔');
+}
+function receiptHTML(r) {
+  const ph = (MT.phone || '').trim() || DM.phone;
+  return `<h2 style="text-align:center;margin:0">${SHOP}</h2>
+  <p style="text-align:center;margin:2px;font-size:13px">পরিচালক: ${OWNER}<br>${ADDR}<br>মোবাইল: ${esc(ph)}</p>
+  <h3 style="text-align:center;margin:10px 0;border:1px solid #888;border-radius:6px;padding:4px">বকেয়া বিল আদায়ের রশিদ</h3>
+  ${trow('রশিদ নং: ' + num(r.no), 'তারিখ: ' + bd(r.d))}
+  <p style="margin:10px 0;font-size:15px">কাস্টমারের নাম: <b>${esc(r.c.n)}</b><br>মোবাইল: ${esc(r.c.ph)}<br>ঠিকানা: ${esc(r.c.a)}</p>
+  <table class="mt"><tr><th>বিবরণ</th><th>আদায় (টাকা)</th></tr><tr><td>বকেয়া বিল পরিশোধ${r.note ? ' — ' + esc(r.note) : ''}</td><td>${bn(r.a)}</td></tr></table>
+  <div style="margin-top:8px">${trow('অবশিষ্ট বাকি', bn(r.bal), 1)}</div>
+  <div style="display:flex;justify-content:space-between;margin-top:40px;align-items:flex-end;gap:10px">
+    <div style="text-align:center;width:45%;border-top:1px solid #444;padding-top:4px">কাস্টমারের স্বাক্ষর</div>
+    <div style="text-align:center;width:45%;height:90px;border:1px dashed #888;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px">প্রতিষ্ঠানের শীল ও স্বাক্ষর</div>
+  </div>`;
+}
+
+/* ক্যাশ মেমো */
+const trow = (a, b, bold) => `<div style="display:flex;justify-content:space-between;padding:2px 0;${bold ? 'font-weight:700' : ''}"><span>${a}</span><span>${b}</span></div>`;
+function memoHTML(m) {
+  const W = MT.showW, ph = (MT.phone || '').trim() || DM.phone;
+  return `<h2 style="text-align:center;margin:0">${SHOP}</h2>
+  <p style="text-align:center;margin:2px;font-size:13px">পরিচালক: ${OWNER}<br>${ADDR}<br>মোবাইল: ${esc(ph)}</p>
+  <h3 style="text-align:center;margin:8px 0;border:1px solid #888;border-radius:6px;padding:3px">${esc((MT.title || '').trim() || DM.title)}</h3>
+  ${trow('মেমো নং: ' + (m.no ? num(m.no) : 'সেভের পর'), 'তারিখ: ' + bd(m.date))}
+  <p style="margin:6px 0;font-size:14px"><b>${esc(m.c.n)}</b><br>${esc(m.c.ph)} • ${esc(m.c.a)}</p>
+  <table class="mt"><tr><th>ক্রম</th><th>পণ্য</th>${W ? '<th>ওজন</th>' : ''}<th>দাম</th><th>পরিমাণ</th><th>মোট</th></tr>
+  ${m.items.map((x, i) => `<tr><td>${num(i + 1)}</td><td>${esc(x.n)}</td>${W ? `<td>${esc(x.w)}</td>` : ''}<td>${num(x.p)}</td><td>${num(x.q)}</td><td>${num(x.p * x.q)}</td></tr>`).join('')}</table>
+  <div style="margin-top:6px">${m.dAmt ? trow('মোট', bn(m.sub)) + trow('ছাড় ' + num(m.dp) + '%', '- ' + bn(m.dAmt)) : ''}${trow('সর্বমোট', bn(m.total), 1)}
+  ${m.cash ? trow('পরিশোধ', 'নগদ') : ''}${!MT.showDue ? '' : m.added ? trow('পূর্বের বকেয়া', bn(m.prev)) + trow('মোট বকেয়া', bn(m.after), 1) : trow('নগদ বিক্রয়', 'বকেয়ায় যোগ হয়নি')}</div>
+  ${MT.note ? `<p style="text-align:center;font-size:12px;margin:14px 0 0">${esc(MT.note)}</p>` : ''}`;
+}
+function mkMemo() {
+  if (!selC || !C.find(x => x.id === selC)) return toast('আগে একজন কাস্টমার বাছুন');
+  if (!cart.length) return toast('আগে পণ্য যোগ করুন');
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">মেমোর ধরন</h3><p>এই পণ্যগুলো কীভাবে বিক্রি হয়েছে?</p><div class="row"><button onclick="buildMemo(true)">💵 নগদ বিক্রি</button><button class="red" onclick="buildMemo(false)">📒 বাকি বিক্রি</button></div><div class="row" style="margin-top:8px"><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
+}
+function buildMemo(isCash) {
+  const c = C.find(x => x.id === selC);
+  if (!c) return toast('কাস্টমার পাওয়া যায়নি');
+  const sub = cTot(), dp = DSC || 0, dAmt = Math.round(sub * dp / 100), t = sub - dAmt;
+  showMemo({ no: 0, date: today(), cid: c.id, c: { n: c.name, ph: c.phone, a: c.address }, items: cart.map(x => ({ n: x.n, w: x.w, p: x.p, tp: x.tp || 0, q: x.q, cid: x.cid || null })), total: t, sub, dp, dAmt, added: !isCash, cash: isCash, prev: bal(c), after: isCash ? bal(c) : bal(c) + t }, false);
+}
+function showMemo(m, saved) {
+  MM = m; $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box">${memoHTML(m)}<div class="row" style="margin-top:14px">${saved
+    ? `<button onclick="printDoc(memoHTML(MM),'ক্যাশ-মেমো-${m.no}')">🖨 প্রিন্ট</button><button class="red" onclick="delMemo(${m.no})">🗑 মেমো মুছুন</button>`
+    : `<button onclick="saveMemo(true)">💾 সেভ ও প্রিন্ট</button><button class="sec" onclick="saveMemo(false)">শুধু সেভ</button>`}<button class="red" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+}
+async function saveMemo(pr) {
+  const m = MM, c = C.find(x => x.id === m.cid); if (!c) return;
+  try {
+    const ref = db.collection('settings').doc('memo');
+    m.no = await db.runTransaction(async t => { const d = await t.get(ref), n = (d.exists ? d.data().n : 1000) + 1; t.set(ref, { n }); return n; });
+  } catch (e) { m.no = Date.now() % 1000000; }
+  const entries = [...(c.entries || [])];
+  if (m.added) entries.push({ d: m.date, t: 'due', a: m.total, n: 'ক্যাশ মেমো #' + num(m.no) });
+  try {
+    await db.collection('customers').doc(c.id).update({ entries, memos: [...(c.memos || []), m] });
+  } catch (e) { return toast('সেভ হয়নি: ' + e.code); }
+  const byC = {};
+  (m.items || []).forEach(x => { if (x.cid) (byC[x.cid] = byC[x.cid] || []).push({ n: x.n, w: x.w, q: x.q, tp: x.tp || 0, sp: x.p || 0, memo: m.no, d: m.date }); });
+  try { await Promise.all(Object.keys(byC).map(id => db.collection('companies').doc(id).update({ sold: firebase.firestore.FieldValue.arrayUnion(...byC[id]) }))); }
+  catch (e) { toast('স্টক আপডেট হয়নি: ' + e.code); }
+  cart = []; DSC = 0; rCart(); toast('মেমো সেভ হয়েছে ✔ স্টক থেকে পণ্য কমেছে');
+  showMemo(m, true); if (pr) printDoc(memoHTML(m), 'ক্যাশ-মেমো-' + m.no);
+}
+
+
+/* ===== কোম্পানি, স্টক ও প্রফিট (সেটিংয়ের ভিতরে) ===== */
+let CO = [], CV = null;
+const cSumP = c => (c.purchases || []).reduce((a, x) => a + x.tp * x.q, 0);
+const cSumS = c => (c.sold || []).reduce((a, x) => a + (x.sp || 0) * x.q, 0);
+const cQty = c => (c.purchases || []).reduce((a, x) => a + x.q, 0);
+const cProf = c => (c.sold || []).reduce((a, x) => a + ((x.sp || 0) - (x.tp || 0)) * x.q, 0);
+const sKey = (n, w) => (n + ' ' + (w || '')).trim();
+const soldOf = (c, n) => (c.sold || []).filter(z => z.n === n).reduce((a, z) => a + z.q, 0);
+const stockIn = (c, n) => (c.purchases || []).filter(x => x.n === n).reduce((a, x) => a + x.q, 0) - (c.sold || []).filter(x => x.n === n).reduce((a, x) => a + x.q, 0);
+const autoNk = n => rom(n).toLowerCase().replace(/[^a-z0-9]/g, '');
+const curComp = () => CO.find(x => x.id === CV);
+const profC = v => v >= 0 ? 'var(--grn)' : 'var(--red)';
+
+function totHTML() {
+  const sub = cTot(), d = Math.round(sub * (DSC || 0) / 100), t = sub - d;
+  return (d ? `<div style="display:flex;justify-content:space-between;margin-top:6px;color:#5b6b63"><span>মোট</span><span>${bn(sub)}</span></div><div style="display:flex;justify-content:space-between;color:#c62828"><span>ছাড় ${num(DSC)}%</span><span>- ${bn(d)}</span></div>` : '')
+    + `<div style="display:flex;justify-content:space-between;font-weight:700;font-size:18px;margin:10px 0"><span>সর্বমোট</span><span>${bn(t)}</span></div>`;
+}
+function rTot() { const e = $('ctot'); if (e) e.innerHTML = totHTML(); }
+
+function loadComp() {
+  db.collection('companies').onSnapshot(s => {
+    CO = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'bn'));
+    if ($('mod').querySelector('[data-comp]')) renderCV();
+    if (!$('vSale').hidden) rPq();
+  }, e => toast('কোম্পানি লোড হয়নি: ' + e.code + ' — Firestore Rules দেখুন'));
+}
+function openCompSet() { CV = 'list'; renderCV(); }
+function renderCV() {
+  const c = CV && CV !== 'list' ? curComp() : null;
+  if (!c) CV = 'list';
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box wide" data-comp="1">${setTabs('comp')}${c ? compProfHTML(c) : compListHTML()}</div>`;
+}
+function compListHTML() {
+  const T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP), SS = T(cSumS);
+  return `<h3 style="margin-top:0">🏭 কোম্পানি ও স্টক</h3>
+  <div class="panel"><h4>💰 প্রফিট সারাংশ (সব কোম্পানি)</h4>
+    <div class="s3" style="margin:0">
+      <div><span>মোট ক্রয় (TP)</span><b>${bn(SP)}</b></div>
+      <div><span>মোট বিক্রয় মূল্য</span><b>${bn(SS)}</b></div>
+      <div><span>মোট লাভ</span><b style="color:${profC(SS - SP)}">${bn(SS - SP)}</b></div>
+    </div></div>
+  <div class="panel"><h4>+ নতুন কোম্পানি প্রোফাইল</h4>
+    <input id="co1" placeholder="কোম্পানির নাম"><input id="co2" type="tel" placeholder="মোবাইল (ঐচ্ছিক)"><input id="co3" placeholder="ঠিকানা (ঐচ্ছিক)">
+    <button style="width:100%;margin-top:6px" onclick="saveNewComp()">সেভ করুন</button></div>
+  <div class="panel"><h4>🏢 কোম্পানির তালিকা</h4>
+    ${CO.map(c => `<div class="card" style="margin-bottom:8px;box-shadow:none;border:1px solid #e3ece7" onclick="CV='${c.id}';renderCV()"><div class="av" style="background:${color(c.name)}">${esc((c.name || '?').charAt(0))}</div><div class="info"><b>${esc(c.name)}</b><small>ক্রয় ${bn(cSumP(c))} • বিক্রয় ${bn(cSumS(c))}</small></div><div class="amt" style="color:${profC(cProf(c))}">লাভ ${bn(cProf(c))}</div></div>`).join('') || '<small style="color:#888">এখনো কোনো কোম্পানি নেই</small>'}
+  </div>
+  <div class="row"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div>`;
+}
+function compProfHTML(c) {
+  const prods = c.products || [], purch = c.purchases || [], stock = {};
+  purch.forEach(x => { const k = x.n; stock[k] = stock[k] || { n: x.n, w: x.w, q: 0 }; stock[k].q += x.q; });
+  (c.sold || []).forEach(x => { const k = x.n; stock[k] = stock[k] || { n: x.n, w: x.w, q: 0 }; stock[k].q -= x.q; });
+  const P_ = cSumP(c), S_ = cSumS(c);
+  const PTP = prods.reduce((a, x) => a + (x.p || 0), 0), PSP = prods.reduce((a, x) => a + (x.sp || 0), 0);
+  return `<button class="back" onclick="CV='list';renderCV()">← কোম্পানির তালিকা</button>
+  <div class="pcard"><div><h2>${esc(c.name)}</h2>${c.phone ? `<p>📞 ${esc(c.phone)}</p>` : ''}${c.address ? `<p>📍 ${esc(c.address)}</p>` : ''}</div></div>
+  <div class="s3">
+    <div><span>ক্রয়ের মোট TP মূল্য</span><b>${bn(P_)}</b></div>
+    <div><span>বিক্রিত পণ্যের বিক্রয় মূল্য</span><b>${bn(S_)}</b></div>
+    <div><span>লাভ (বিক্রি থেকে)</span><b style="color:${profC(cProf(c))}">${bn(cProf(c))}</b></div>
+  </div>
+  <div class="panel"><h4>📦 কোম্পানির পণ্য (নাম, ওজন, দাম)</h4>
+    <div class="row"><input id="cpn" placeholder="পণ্যের নাম"><input id="cpw" placeholder="ওজন"><input id="cpp" type="number" inputmode="decimal" placeholder="TP রেট (ক্রয় মূল্য)"><input id="cps" type="number" inputmode="decimal" placeholder="বিক্রয় মূল্য"></div>
+    <input id="cpk" placeholder="নিকনেম (যেমন abada)">
+    <button style="width:100%" onclick="addCompProd()">+ পণ্য যোগ</button>
+    <p style="margin:8px 0 0;font-weight:700">মোট TP রেট: ${bn(PTP)} &nbsp;•&nbsp; মোট বিক্রয় মূল্য: ${bn(PSP)}</p><div style="margin-top:8px">${prods.map((x, i) => `<div class="ent"><div class="l"><div><b>${esc(x.n)}</b> <small style="color:#6b7b73">${esc(x.w)}</small><br><input value="${esc(x.nk || '')}" placeholder="নিকনেম লিখুন" onchange="setCompNk(${i},this.value)" style="padding:4px 8px;font-size:13px;width:150px;margin:2px 0"></div></div><div style="text-align:right;white-space:nowrap"><small style="color:#6b7b73">TP ${bn(x.p)}</small><br><input type="number" inputmode="decimal" value="${x.sp || ''}" placeholder="বিক্রয় মূল্য" onchange="setCompSp(${i},this.value)" style="width:120px;padding:4px 8px;font-size:13px;margin:2px 0"></div><a href="#" onclick="delCompProd(${i});return false">✕</a></div>`).join('') || '<small style="color:#888">কোনো পণ্য নেই</small>'}</div>
+  </div>
+  <div class="panel"><h4>📂 ফাইল থেকে পণ্য তালিকা (Word / PDF)</h4>
+    <p class="nt">ফরম্যাট: <b>ক্রমিক নং | পণ্যের নাম | ওজন | দাম</b>। নিকনেম পরে প্রতিটি পণ্যের ঘরে লিখে নিতে পারবেন।</p>
+    <input type="file" accept=".docx,.pdf" onchange="upCompProd(this)"><div id="cpmsg"></div></div>
+  <div class="panel"><h4>🧾 ক্রয়ের হিসাব (TP রেট)</h4>
+    <datalist id="cpl">${prods.map(x => `<option value="${esc(x.n)}">${esc(x.nk || '')}</option>`).join('')}</datalist>
+    <input id="cpd" type="date" value="${today()}">
+    <div class="row"><input id="cpn2" list="cpl" placeholder="পণ্যের নাম" oninput="fillCat()"><input id="cpw2" placeholder="ওজন"></div>
+    <div class="row"><input id="ctp" type="number" inputmode="decimal" placeholder="TP রেট (ক্রয় মূল্য)"><input id="csp" type="number" inputmode="decimal" placeholder="বিক্রয় মূল্য"><input id="cq" type="number" inputmode="numeric" placeholder="পরিমাণ"></div>
+    <button style="width:100%" onclick="addPurchase()">+ ক্রয় যোগ করুন</button>
+    <div style="overflow-x:auto;margin-top:10px"><table class="mt"><tr><th>তারিখ</th><th>পণ্য</th><th>TP</th><th>বিক্রয়</th><th>পরিমাণ</th><th>ক্রয় মূল্য</th><th>লাভ</th><th></th></tr>
+    ${purch.map((x, i) => `<tr><td>${bd(x.d)}</td><td>${esc(x.n)} ${esc(x.w)}</td><td>${num(x.tp)}</td><td>${num(x.sp)}</td><td>${num(x.q)}</td><td>${num(x.tp * x.q)}</td><td style="color:${profC(x.sp - x.tp)}">${num((x.sp - x.tp) * x.q)}</td><td><a href="#" onclick="delPurchase(${i});return false">✕</a></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:#888">কোনো ক্রয় নেই</td></tr>'}
+    <tr><th colspan="5" style="text-align:right">মোট</th><th>${num(P_)}</th><th style="color:${profC(S_ - P_)}">${num(S_ - P_)}</th><th></th></tr></table></div>
+  </div>
+  <div class="panel"><h4>📊 স্টক</h4>
+    ${Object.values(stock).map(x => `<div class="ent"><div class="l"><div><b>${esc(x.n)}</b> <small style="color:#6b7b73">${esc(x.w)}</small></div></div><div style="text-align:right"><small style="color:#6b7b73">TP ${bn((prods.find(z => z.n === x.n) || {}).p || 0)} • বিক্রয় ${bn((prods.find(z => z.n === x.n) || {}).sp || 0)}</small><br><b>${num(x.q)} টি</b><br><small style="color:#c62828">বিক্রি -${num(soldOf(c, x.n))}</small></div></div>`).join('') || '<small style="color:#888">স্টকে কিছু নেই — ক্রয় যোগ করুন</small>'}
+  </div>
+  <button class="red" style="width:100%" onclick="delComp()">🗑 কোম্পানি মুছুন</button>`;
+}
+function saveNewComp() {
+  const name = $('co1').value.trim();
+  if (!name) return toast('কোম্পানির নাম দিন');
+  db.collection('companies').add({ name, phone: eng($('co2').value.trim()), address: $('co3').value.trim(), products: [], purchases: [], created: Date.now() })
+    .then(r => { CV = r.id; toast('কোম্পানি যোগ হয়েছে ✔'); },
+      e => toast('কোম্পানি সেভ হয়নি: ' + e.code + ' — Firestore Rules এ companies কালেকশন allow করুন'));
+}
+function addCompProd() {
+  const c = curComp(), n = $('cpn').value.trim(), w = $('cpw').value.trim(), p = parseFloat(eng($('cpp').value));
+  if (!n || !(p > 0)) return toast('পণ্যের নাম ও দাম দিন');
+  const nk = $('cpk').value.trim();
+  db.collection('companies').doc(c.id).update({ products: [...(c.products || []), { n, w, p, sp: parseFloat(eng($('cps').value)) || 0, nk: nk || autoNk(n) }] }).then(() => toast('পণ্য যোগ হয়েছে ✔'));
+}
+function setCompSp(i, v) {
+  const c = curComp();
+  db.collection('companies').doc(c.id).update({ products: (c.products || []).map((x, k) => k === i ? { ...x, sp: parseFloat(eng(v)) || 0 } : x) }).then(() => toast('বিক্রয় মূল্য সেভ হয়েছে ✔'));
+}
+function setCompNk(i, v) {
+  const c = curComp();
+  db.collection('companies').doc(c.id).update({ products: (c.products || []).map((x, k) => k === i ? { ...x, nk: v.trim() } : x) }).then(() => toast('নিকনেম সেভ হয়েছে ✔'));
+}
+async function upCompProd(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const c = curComp(), m = $('cpmsg'); m.innerHTML = '<p>ফাইল পড়া হচ্ছে...</p>';
+  try {
+    const L = parseRows(/\.pdf$/i.test(f.name) ? await readPdf(f) : await readDocx(f));
+    if (!L.length) { m.innerHTML = '<p style="color:#c62828">কোনো পণ্য পাওয়া যায়নি। ফরম্যাট: ক্রমিক | নাম | ওজন | দাম</p>'; inp.value = ''; return; }
+    const have = new Set((c.products || []).map(x => x.n));
+    const add = L.filter(x => !have.has(x.n));
+    if (!confirm(num(add.length) + ' টি নতুন পণ্য পাওয়া গেছে' + (L.length - add.length ? ' (' + num(L.length - add.length) + ' টি আগে থেকেই আছে, বাদ যাবে)' : '') + '। যোগ করবেন?')) { m.innerHTML = ''; inp.value = ''; return; }
+    if (!add.length) { m.innerHTML = '<p>সব পণ্য আগে থেকেই আছে।</p>'; inp.value = ''; return; }
+    await db.collection('companies').doc(c.id).update({ products: [...(c.products || []), ...add.map(x => ({ n: x.n, w: x.w, p: x.p, sp: 0, nk: autoNk(x.n) }))] });
+    m.innerHTML = ''; inp.value = ''; toast('✔ ' + num(add.length) + ' টি পণ্য যোগ হয়েছে');
+  } catch (e) { m.innerHTML = '<p style="color:#c62828">ফাইল পড়া যায়নি: ' + esc(e.message) + '</p>'; inp.value = ''; }
+}
+function delCompProd(i) {
+  if (!confirm('এই পণ্য মুছবেন?')) return;
+  const c = curComp();
+  db.collection('companies').doc(c.id).update({ products: (c.products || []).filter((_, k) => k !== i) });
+}
+function fillCat() {
+  const c = curComp(), v = $('cpn2').value.trim(), x = (c.products || []).find(z => z.n === v || (z.nk && z.nk === v));
+  if (x) { $('cpn2').value = x.n; $('cpw2').value = x.w || ''; if (!$('csp').value) $('csp').value = x.sp || ''; }
+}
+function addPurchase() {
+  const c = curComp(), n = $('cpn2').value.trim(), w = $('cpw2').value.trim();
+  const tp = parseFloat(eng($('ctp').value)), sp = parseFloat(eng($('csp').value)), q = parseInt(eng($('cq').value));
+  if (!n) return toast('পণ্যের নাম দিন');
+  if (!(tp > 0)) return toast('TP রেট (ক্রয় মূল্য) দিন');
+  if (!(sp > 0)) return toast('বিক্রয় মূল্য দিন');
+  if (!(q > 0)) return toast('পরিমাণ দিন');
+  const prods = c.products || [], upd = { purchases: [...(c.purchases || []), { d: $('cpd').value || today(), n, w, tp, sp, q }] };
+  if (!prods.some(z => z.n === n)) upd.products = [...prods, { n, w, p: tp, sp, nk: autoNk(n) }];
+  db.collection('companies').doc(c.id).update(upd).then(() => toast('ক্রয় যোগ হয়েছে ✔'));
+}
+function delPurchase(i) {
+  if (!confirm('এই ক্রয়টি মুছবেন?')) return;
+  const c = curComp();
+  db.collection('companies').doc(c.id).update({ purchases: (c.purchases || []).filter((_, k) => k !== i) });
+}
+function delComp() {
+  if (!confirm('এই কোম্পানি ও তার সব হিসাব মুছে যাবে। নিশ্চিত?')) return;
+  db.collection('companies').doc(CV).delete(); CV = 'list'; toast('কোম্পানি মুছে গেছে');
+}
+
+async function delMemo(no) {
+  const cid = MM && MM.cid, c = C.find(x => x.id === cid);
+  if (!c) return toast('কাস্টমার পাওয়া যায়নি');
+  if (!confirm('মেমো নং ' + num(no) + ' মুছবেন? বকেয়া ও স্টক দুটোই ফিরে আসবে।')) return;
+  const memo = (c.memos || []).find(z => z.no === no);
+  const tag = 'ক্যাশ মেমো #' + num(no);
+  const entries = (c.entries || []).filter(x => !(memo && memo.added && x.n === tag));
+  try {
+    await db.collection('customers').doc(cid).update({ entries, memos: (c.memos || []).filter(z => z.no !== no) });
+    await Promise.all(CO.filter(co => (co.sold || []).some(x => x.memo === no))
+      .map(co => db.collection('companies').doc(co.id).update({ sold: co.sold.filter(x => x.memo !== no) })));
+  } catch (e) { return toast('মুছতে সমস্যা: ' + e.code); }
+  $('mod').hidden = true; toast('মেমো মুছে গেছে, বকেয়া ও স্টক ফিরেছে ✔');
+}
+
+/* ডাকনাম: বাংলা নামের ইংরেজি উচ্চারণ দিয়ে খোঁজা (মেমোতে শুধু বাংলা নাম যায়) */
+const RM = {'ক':'k','খ':'kh','গ':'g','ঘ':'gh','ঙ':'ng','চ':'ch','ছ':'chh','জ':'j','ঝ':'jh','ঞ':'n','ট':'t','ঠ':'th','ড':'d','ঢ':'dh','ণ':'n','ত':'t','থ':'th','দ':'d','ধ':'dh','ন':'n','প':'p','ফ':'f','ব':'b','ভ':'bh','ম':'m','য':'j','র':'r','ল':'l','শ':'sh','ষ':'sh','স':'s','হ':'h','ড়':'r','ঢ়':'rh','য়':'y','ৎ':'t','ং':'ng','ঃ':'h','অ':'o','আ':'a','ই':'i','ঈ':'i','উ':'u','ঊ':'u','ঋ':'ri','এ':'e','ঐ':'oi','ও':'o','ঔ':'ou','া':'a','ি':'i','ী':'i','ু':'u','ূ':'u','ৃ':'ri','ে':'e','ৈ':'oi','ো':'o','ৌ':'ou'};
+const rom = s => [...String(s)].map(ch => RM[ch] ?? (/[\u0981\u09CD\u200C\u200D\u09BC]/.test(ch) ? '' : ch)).join('');
+const sk = s => String(s).toLowerCase().replace(/[^a-z]/g, '').replace(/[aeiouyh]/g, '');
+function mP(x, q) {
+  q = q.trim().toLowerCase(); if (!q) return true;
+  const k = ((x.n || '') + ' ' + (x.nk || '')).toLowerCase();
+  if (k.includes(q)) return true;
+  if (!/[a-z]/.test(q)) return false;
+  const sq = sk(q);
+  return sq.length > 0 && sk(rom(k)).includes(sq);
+}
+
+/* ফাইল থেকে কাস্টমার তালিকা (শুধু নাম, ঠিকানা, মোবাইল) */
+function parseCust(rows) {
+  const out = [], seen = new Set(C.map(c => c.phone)); let dup = 0;
+  rows.forEach(r => {
+    const cells = (Array.isArray(r) ? r : String(r).split(/\s*[|,\t]\s*|\s{2,}/)).map(x => String(x).trim()).filter(Boolean);
+    let ph = '', rest = [];
+    cells.forEach(x => {
+      const d = eng(x).replace(/[^\d+]/g, '');
+      if (!ph && /^(\+?88)?0?1[3-9]\d{8}$/.test(d)) ph = d.replace(/^\+?88/, '').replace(/^1/, '01');
+      else rest.push(x);
+    });
+    if (!ph) return;
+    rest = rest.filter(x => !/^[৳\s]*[\d০-৯][\d০-৯.,\s]*(টাকা|৳|tk)?$/i.test(x));
+    if (!rest.length) return;
+    if (seen.has(ph)) { dup++; return; }
+    seen.add(ph);
+    out.push({ name: rest[0], phone: ph, address: rest.slice(1).join(', ') });
+  });
+  return { out, dup };
+}
+async function upCust(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const m = $('cmsg'); m.innerHTML = '<p>ফাইল পড়া হচ্ছে...</p>';
+  try {
+    const { out: L, dup } = parseCust(/\.pdf$/i.test(f.name) ? await readPdf(f) : await readDocx(f));
+    if (!L.length) { m.innerHTML = '<p style="color:#c62828">নতুন কাস্টমার পাওয়া যায়নি। প্রতিটি সারিতে নাম, ঠিকানা ও মোবাইল নাম্বার থাকতে হবে।</p>'; inp.value = ''; return; }
+    if (!confirm(num(L.length) + ' জন নতুন কাস্টমার পাওয়া গেছে' + (dup ? ' (' + num(dup) + ' জন আগে থেকেই আছে, বাদ যাবে)' : '') + '।\nপ্রোফাইল তৈরি করবেন?\n\nপ্রথম জন: ' + L[0].name + ' — ' + L[0].address + ' — ' + L[0].phone)) { m.innerHTML = ''; inp.value = ''; return; }
+    const base = Date.now();
+    for (let i = 0; i < L.length; i += 400) {
+      const b = db.batch();
+      L.slice(i, i + 400).forEach((x, k) => b.set(db.collection('customers').doc(), { ...x, entries: [], created: base + i + k }));
+      await b.commit();
+    }
+    $('mod').hidden = true; toast('✔ ' + num(L.length) + ' জনের প্রোফাইল তৈরি হয়েছে'); location.hash = '';
+  } catch (e) { m.innerHTML = '<p style="color:#c62828">ফাইল পড়া যায়নি: ' + esc(e.message) + '</p>'; inp.value = ''; }
+}
+
+
+/* ডাকনামে কাস্টমার খোঁজা */
+const mC = (c, q) => mP({ n: c.name, nk: c.nk }, q) || (c.phone || '').includes(eng(q));
+
+/* ক্যাশ মেমো টেমপ্লেট সেটিং */
+const DM = { title: 'ক্যাশ মেমো', phone: '+880 1789-538190', note: 'ধন্যবাদ — ' + SHOP, showW: true, showDue: true };
+let MT = (() => { try { return { ...DM, ...JSON.parse(localStorage.getItem('mt')) }; } catch (e) { return { ...DM }; } })();
+const SAMPLE = { no: 1001, date: new Date().toISOString().slice(0, 10), c: { n: 'রহিম উদ্দিন', ph: '01711000001', a: 'আঝইর বাজার' }, items: [{ n: 'মিনিকেট চাল', w: '৫০ কেজি', p: 2800, q: 1 }, { n: 'চিনি', w: '১ কেজি', p: 130, q: 2 }], total: 3060, added: true, prev: 5000, after: 8060 };
+function openMemoSet() {
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box">${setTabs('memo')}
+    <label class="nt">মেমোর শিরোনাম</label><input id="mt1" value="${esc(MT.title)}" oninput="mprev()">
+    <label class="nt">মালিকের ফোন নাম্বার (প্রতিটি মেমোতে ছাপা হবে)</label><input id="mt2" value="${esc(MT.phone)}" oninput="mprev()">
+    <label class="nt">মেমোর নিচের লেখা</label><textarea id="mt3" rows="2" oninput="mprev()">${esc(MT.note)}</textarea>
+    <label class="chk" style="margin:4px 0"><input type="checkbox" id="mt4" ${MT.showW ? 'checked' : ''} style="width:auto" onchange="mprev()"> ওজন/পরিমাণের কলাম দেখান</label>
+    <label class="chk" style="margin:4px 0"><input type="checkbox" id="mt5" ${MT.showDue ? 'checked' : ''} style="width:auto" onchange="mprev()"> বকেয়ার হিসাব (পূর্বের ও মোট বকেয়া) দেখান</label>
+    <div class="panel" style="margin:8px 0;background:#fff"><b>প্রিভিউ:</b><div id="mprv" style="margin-top:6px"></div></div>
+    <div class="row"><button onclick="saveMemoSet()">সেভ করুন</button><button class="sec" onclick="resetMemoSet()">মূল টেমপ্লেট</button><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+  mprev();
+}
+const curMT = () => ({ title: $('mt1').value.trim(), phone: $('mt2').value.trim(), note: $('mt3').value.trim(), showW: $('mt4').checked, showDue: $('mt5').checked });
+function mprev() { const o = MT; MT = curMT(); $('mprv').innerHTML = memoHTML(SAMPLE); MT = o; }
+function resetMemoSet() { $('mt1').value = DM.title; $('mt2').value = DM.phone; $('mt3').value = DM.note; $('mt4').checked = $('mt5').checked = true; mprev(); }
+function saveMemoSet() {
+  MT = { ...DM, ...curMT() };
+  try { localStorage.setItem('mt', JSON.stringify(MT)); } catch (e) {}
+  db.collection('settings').doc('memotpl').set(MT).then(() => toast('মেমো টেমপ্লেট সেভ হয়েছে ✔'), () => toast('শুধু এই ডিভাইসে সেভ হয়েছে (Firestore Rules দেখুন)'));
+  $('mod').hidden = true;
+}
+
+/* কাস্টমারের তথ্য এডিট */
+function editC() {
+  const c = C.find(x => x.id === curId());
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box"><h3 style="margin-top:0">✏️ কাস্টমারের তথ্য</h3>
+    <label class="nt">নাম</label><input id="ec1" value="${esc(c.name)}">
+    <label class="nt">মোবাইল নাম্বার</label><input id="ec2" type="tel" value="${esc(c.phone)}">
+    <label class="nt">ঠিকানা</label><input id="ec3" value="${esc(c.address)}">
+    <label class="nt">ডাকনাম (শুধু খোঁজার জন্য, যেমন hanif)</label><input id="ec4" value="${esc(c.nk || '')}">
+    <div class="row"><button onclick="saveCE()">সেভ করুন</button><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
+}
+function saveCE() {
+  const name = $('ec1').value.trim(), phone = eng($('ec2').value.trim());
+  if (!name || !phone) return toast('নাম ও মোবাইল নাম্বার দিন');
+  db.collection('customers').doc(curId()).update({ name, phone, address: $('ec3').value.trim(), nk: $('ec4').value.trim() }).then(() => { $('mod').hidden = true; toast('তথ্য আপডেট হয়েছে ✔'); });
+}
+
+function printDoc(html, title) {
+  $('pr').innerHTML = html;
+  const old = document.title; document.title = title;
+  window.print(); setTimeout(() => document.title = old, 1500);
+}
+const HEAD = `<h2 style="text-align:center;margin:0">${SHOP}</h2>
+  <p style="text-align:center;margin:2px">পরিচালক: ${OWNER} • আঝইর বাজার, নাচোল, চাঁপাইনবাবগঞ্জ</p>`;
+
+function pdf() {
+  const L = C.filter(c => bal(c) > 0).sort((a, b) => (a.address || '').localeCompare(b.address || '', 'bn') || a.name.localeCompare(b.name, 'bn'));
+  const T = f => bn(L.reduce((a, c) => a + f(c), 0));
+  printDoc(`${HEAD}<h3 style="text-align:center">বকেয়া তালিকা — ${new Date().toLocaleDateString('bn-BD')}</h3>
+    <table><tr><th>ক্রম</th><th>নাম</th><th>ঠিকানা</th><th>মোবাইল</th><th>মোট বিল</th><th>জমা</th><th>বাকি</th></tr>
+    ${L.map((c, i) => `<tr><td>${num(i + 1)}</td><td>${esc(c.name)}</td><td>${esc(c.address)}</td><td>${esc(c.phone)}</td>
+      <td>${bn(sum(c, 'due'))}</td><td>${bn(sum(c, 'paid'))}</td><td><b>${bn(bal(c))}</b></td></tr>`).join('')}
+    <tr><th colspan="4" style="text-align:right">সর্বমোট</th><th>${T(c => sum(c, 'due'))}</th><th>${T(c => sum(c, 'paid'))}</th><th>${T(bal)}</th></tr></table>`, 'বকেয়া-তালিকা');
+}
+
+function pdfC() {
+  const c = C.find(x => x.id === curId());
+  const bd = d => d.split('-').reverse().join('/').replace(/\d/g, x => '০১২৩৪৫৬৭৮৯'[x]);
+  const E = [...(c.entries || [])].sort((a, b) => a.d.localeCompare(b.d));
+  let run = 0;
+  printDoc(`<div style="display:flex;gap:14px;align-items:flex-start"><div style="flex:1">${HEAD}<h3 style="text-align:center">কাস্টমার হিসাব বিবরণী — ${new Date().toLocaleDateString('bn-BD')}</h3>
+    <p><b>নাম:</b> ${esc(c.name)} &nbsp; <b>মোবাইল:</b> ${esc(c.phone)}<br><b>ঠিকানা:</b> ${esc(c.address)} &nbsp; <b>আইডি:</b> ${c.id.slice(0, 6).toUpperCase()}</p></div>${c.photo ? `<img src="${c.photo}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #888;flex:none">` : ''}</div>
+    <table><tr><th>ক্রম</th><th>তারিখ</th><th>বিবরণ</th><th>বকেয়া</th><th>জমা</th><th>বাকি (চলমান)</th></tr>
+    ${E.map((x, i) => { run += x.t === 'due' ? x.a : -x.a; return `<tr><td>${num(i + 1)}</td><td>${bd(x.d)}</td><td>${esc(x.n) || (x.t === 'due' ? 'বকেয়া' : 'জমা')}</td>
+      <td>${x.t === 'due' ? bn(x.a) : ''}</td><td>${x.t === 'paid' ? bn(x.a) : ''}</td><td>${bn(run)}</td></tr>`; }).join('')}
+    <tr><th colspan="3" style="text-align:right">সর্বমোট</th><th>${bn(sum(c, 'due'))}</th><th>${bn(sum(c, 'paid'))}</th><th>${bn(bal(c))}</th></tr></table>
+    <p style="font-size:16px"><b>মোট বিল:</b> ${bn(sum(c, 'due'))} &nbsp; <b>মোট জমা:</b> ${bn(sum(c, 'paid'))} &nbsp; <b>বর্তমান বাকি:</b> ${bn(bal(c))}</p>`, 'হিসাব-' + c.name);
+}
+</script>
+</body>
+</html>
