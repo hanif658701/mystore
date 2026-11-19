@@ -313,7 +313,7 @@ function openProfile(id, refresh) {
       <input id="en" placeholder="নোট (ঐচ্ছিক)" value="${esc(keep?.n || '')}">
       <div class="row"><button class="red" onclick="addE('due')">+ বকেয়া</button><button onclick="addE('paid')">+ জমা</button></div>
     </div>
-    <button style="width:100%;margin-bottom:8px" onclick="driveCustomer()">☁️ এই কাস্টমারের ফাইল গুগল ড্রাইভে সেভ</button>
+    <button style="width:100%;margin-bottom:8px" onclick="driveCustomer()">📄 এই কাস্টমারের সব মেমো PDF হিসেবে ড্রাইভে</button>
     <button style="width:100%;margin-bottom:8px" onclick="payPrevFromProfile()">💰 পূর্বের বছরের বাকি পরিশোধ করুন</button>
     <div class="panel"><h4>🧾 মেমো তালিকা (এডিট / পণ্য রিটার্ন)</h4>
       ${(c.memos || []).slice().reverse().map(m => `<div class="ent"><div class="l"><div><b>মেমো ${num(m.no)}</b> <small style="color:#6b7b73">${bd(m.date)}</small><br><small style="color:#6b7b73">${m.hm ? '🧪 হরমোন' : '🛒 বিষ'} • ${m.cash ? 'নগদ' : 'বাকি'} • ${(m.items || []).map(x => esc(x.n) + ' × ' + num(x.q)).join(', ')}</small></div></div><b>${bn(m.total)}</b><button class="sec" style="width:auto;padding:6px 10px" onclick="memoEditOpen(${m.no})">এডিট</button></div>`).join('') || '<small style="color:#888">কোনো মেমো নেই</small>'}
@@ -711,16 +711,64 @@ async function driveSaveFile(name, obj, folders) {
   const r = await fetch(url, { method: ex ? 'PATCH' : 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body });
   if (!r.ok) throw new Error('HTTP ' + r.status);
 }
+const JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const H2C_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+function loadScr(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector('script[src="' + src + '"]')) return res();
+    const sc = document.createElement('script');
+    sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error('লাইব্রেরি লোড হয়নি, ইন্টারনেট দেখুন'));
+    document.head.appendChild(sc);
+  });
+}
+async function memosPdfBlob(c) {
+  const memos = (c.memos || []).slice().sort((a, b) => a.no - b.no);
+  if (!memos.length) throw new Error('এই কাস্টমারের কোনো মেমো নেই');
+  await loadScr(H2C_URL); await loadScr(JSPDF_URL);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+  const PW = 210, PH = 297;
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:24px;color:#000;font-family:"Noto Sans Bengali","Hind Siliguri",sans-serif';
+  document.body.appendChild(box);
+  try {
+    for (let i = 0; i < memos.length; i++) {
+      box.innerHTML = memoHTML(memos[i]);
+      const cv = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff' });
+      const ratio = cv.height / cv.width;
+      let w = PW, h = PW * ratio;
+      if (h > PH) { h = PH; w = PH / ratio; }
+      if (i > 0) pdf.addPage();
+      pdf.addImage(cv.toDataURL('image/jpeg', 0.92), 'JPEG', (PW - w) / 2, 0, w, h);
+    }
+    return pdf.output('blob');
+  } finally { box.remove(); }
+}
+async function driveSaveBlob(name, blob, mime, folders) {
+  const tok = await driveAuth(), H = { Authorization: 'Bearer ' + tok };
+  let parent = null;
+  for (const f of folders) parent = await driveFolderId(H, f, parent);
+  const q = encodeURIComponent("name='" + name + "' and '" + parent + "' in parents and trashed=false");
+  const ex = ((await (await fetch('https://www.googleapis.com/drive/v3/files?q=' + q, { headers: H })).json()).files || [])[0];
+  const b = 'bkp' + Date.now();
+  const meta = ex ? { name, mimeType: mime } : { name, parents: [parent], mimeType: mime };
+  const head = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: ' + mime + '\r\n\r\n';
+  const body = new Blob([head, blob, '\r\n--' + b + '--']);
+  const url = ex ? 'https://www.googleapis.com/upload/drive/v3/files/' + ex.id + '?uploadType=multipart' : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  const r = await fetch(url, { method: ex ? 'PATCH' : 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+}
 async function driveCustomer() {
   const c = C.find(x => x.id === curId()); if (!c) return;
   if (!GDRIVE_CLIENT_ID) return toast('গুগল ক্লায়েন্ট আইডি বসানো নেই');
-  const name = (idOf(c) + ' - ' + c.name + ' - ' + today() + '.json').replace(/[\/\\]/g, '-');
-  const obj = { app: 'mesars-full-enterprise', type: 'customer', date: today(), customer: { ...c } };
+  const name = (idOf(c) + ' - ' + c.name + ' - ' + today() + ' - মেমো.pdf').replace(/[\/\\]/g, '-');
   try {
+    toast('PDF তৈরি হচ্ছে...');
+    const blob = await memosPdfBlob(c);
     toast('ড্রাইভে আপলোড হচ্ছে...');
-    await driveSaveFile(name, obj, [GDRIVE_FOLDER, 'Customers']);
+    await driveSaveBlob(name, blob, 'application/pdf', [GDRIVE_FOLDER, 'Customers']);
     toast('ড্রাইভে সেভ হয়েছে ✔ ' + name);
-  } catch (e) { toast('আপলোড হয়নি: ' + e.message); }
+  } catch (e) { toast('হয়নি: ' + e.message); }
 }
 
 /* ===== ব্যাকআপ ও রিস্টোর ===== */
