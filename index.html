@@ -412,7 +412,8 @@ const DASH = [
   ['🧪', 'openHormSet()', 'linear-gradient(135deg,#8e2de2,#4a00e0)', 'হরমোন'],
   ['👥', 'openAct()', 'linear-gradient(135deg,#f953c6,#b91d73)', 'কাস্টমার অ্যাক্টিভিটি'],
   ['🏢', 'openExp()', 'linear-gradient(135deg,#ff416c,#ff4b2b)', 'প্রতিষ্ঠান পরিচালনা ব্যয়'],
-  ['💾', 'openBackup()', 'linear-gradient(135deg,#0ba360,#3cba92)', 'ব্যাকআপ ও রিস্টোর']
+  ['💾', 'openBackup()', 'linear-gradient(135deg,#0ba360,#3cba92)', 'ব্যাকআপ ও রিস্টোর'],
+  ['🗑️', 'openDelSet()', 'linear-gradient(135deg,#d50000,#ff5252)', 'ডিলিট']
 ];
 function openSet() {
   $('mod').hidden = false;
@@ -420,7 +421,7 @@ function openSet() {
     <div class="dash">${DASH.map(d => `<button class="dbtn" style="background:${d[2]}" onclick="${d[1]}"><span class="dic">${d[0]}</span>${d[3]}</button>`).join('')}</div>
     <div class="row" style="margin-top:12px"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
 }
-function setTabs(a) { return `<h3 style="margin-top:0">⚙️ সেটিং</h3><div class="row"><button class="sec" onclick="openSet()">🏠 ড্যাশবোর্ড</button><button class="${a === 'sms' ? '' : 'sec'}" onclick="openSmsSet()">📩 SMS</button><button class="${a === 'memo' ? '' : 'sec'}" onclick="openMemoSet()">🧾 ক্যাশ মেমো</button><button class="${a === 'comp' ? '' : 'sec'}" onclick="openCompSet()">🏭 কোম্পানি ও স্টক</button><button class="${a === 'profit' ? '' : 'sec'}" onclick="openProfitSet()">💰 প্রফিট</button><button class="${a === 'hm' ? '' : 'sec'}" onclick="openHormSet()">🧪 হরমোন</button><button class="${a === 'lq' ? '' : 'sec'}" onclick="openLiqSet()">💧 লিকুইড</button><button class="${a === 'act' ? '' : 'sec'}" onclick="openAct()">👥 কাস্টমার অ্যাক্টিভিটি</button><button class="${a === 'exp' ? '' : 'sec'}" onclick="openExp()">🏢 ব্যয়</button></div>`; }
+function setTabs(a) { return `<h3 style="margin-top:0">⚙️ সেটিং</h3><div class="row"><button class="sec" onclick="openSet()">🏠 ড্যাশবোর্ড</button><button class="${a === 'sms' ? '' : 'sec'}" onclick="openSmsSet()">📩 SMS</button><button class="${a === 'memo' ? '' : 'sec'}" onclick="openMemoSet()">🧾 ক্যাশ মেমো</button><button class="${a === 'comp' ? '' : 'sec'}" onclick="openCompSet()">🏭 কোম্পানি ও স্টক</button><button class="${a === 'profit' ? '' : 'sec'}" onclick="openProfitSet()">💰 প্রফিট</button><button class="${a === 'hm' ? '' : 'sec'}" onclick="openHormSet()">🧪 হরমোন</button><button class="${a === 'lq' ? '' : 'sec'}" onclick="openLiqSet()">💧 লিকুইড</button><button class="${a === 'act' ? '' : 'sec'}" onclick="openAct()">👥 কাস্টমার অ্যাক্টিভিটি</button><button class="${a === 'exp' ? '' : 'sec'}" onclick="openExp()">🏢 ব্যয়</button><button class="${a === 'del' ? '' : 'sec'}" style="color:#d50000" onclick="openDelSet()">🗑️ ডিলিট</button></div>`; }
 
 /* ===== বিষ + লিকুইড + হরমোন একত্রে লাভ-ক্ষতি ===== */
 function extraTot() { const h = hmTotals(), l = lqTotals(); return { add: Math.round(h.add + l.add), sold: Math.round(h.sold + l.sold), pf: Math.round(h.pf + l.pf) }; }
@@ -827,6 +828,56 @@ async function driveSaveBlob(name, blob, mime, folders) {
   const url = ex ? 'https://www.googleapis.com/upload/drive/v3/files/' + ex.id + '?uploadType=multipart' : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
   const r = await fetch(url, { method: ex ? 'PATCH' : 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body });
   if (!r.ok) throw new Error('HTTP ' + r.status);
+}
+
+
+/* ===== ডিলিট (পাসওয়ার্ড সুরক্ষিত) ===== */
+const DEL_HASH = '58432f8a635410cabcd9b5dab8d66597da64221f392692cde6b4856f70af4740';
+const DEL_OPTS = {
+  all: { t: '🗑️ সব ডিলিট', d: 'কাস্টমার, প্রোডাক্ট, কোম্পানি, হরমোন ও লিকুইড সব', cols: ['customers', 'products', 'companies', 'hormone', 'liquid'], bg: 'linear-gradient(135deg,#b71c1c,#d50000)' },
+  cust: { t: '👥 সব কাস্টমার ডিলিট', d: 'সব কাস্টমার, তাদের মেমো ও বকেয়াসহ', cols: ['customers'], bg: 'linear-gradient(135deg,#f953c6,#b91d73)' },
+  prod: { t: '📦 সব প্রোডাক্ট ডিলিট', d: 'প্রোডাক্ট তালিকার সব পণ্য', cols: ['products'], bg: 'linear-gradient(135deg,#f7971e,#e65100)' }
+};
+function openDelSet() {
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box popBox" data-del="1">${setTabs('del')}<div class="popH" style="background:linear-gradient(90deg,#d50000,#ff5252,#d50000);background-size:200% auto">🗑️ ডিলিট</div>
+    <p style="text-align:center;margin:0 0 6px;color:#c62828;font-weight:700">⚠️ মুছে ফেললে আর ফেরত আসবে না। আগে ব্যাকআপ নিয়ে রাখুন।</p>
+    ${Object.keys(DEL_OPTS).map(k => `<div class="pcardC" style="background:${DEL_OPTS[k].bg};cursor:pointer" onclick="delAsk('${k}')"><span>${DEL_OPTS[k].t}<br><small style="font-weight:400">${DEL_OPTS[k].d}</small></span><b>›</b></div>`).join('')}
+    <div class="row" style="margin-top:12px"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+}
+function delAsk(k) {
+  const o = DEL_OPTS[k];
+  $('mod').innerHTML = `<div class="box popBox"><div class="popH" style="background:linear-gradient(90deg,#d50000,#ff5252,#d50000);background-size:200% auto">🔒 পাসওয়ার্ড দিন</div>
+    <p style="text-align:center;margin:0 0 8px"><b>${o.t}</b><br><small style="color:#6b7b73">${o.d}</small></p>
+    <input id="delPw" type="password" placeholder="ডিলিট পাসওয়ার্ড" autocomplete="off">
+    <div class="row" style="margin-top:10px"><button id="delGo" class="red" onclick="delRun('${k}')">ডিলিট করুন</button><button class="sec" onclick="openDelSet()">বাতিল</button></div></div>`;
+  setTimeout(() => { const i = $('delPw'); if (i) i.focus(); }, 100);
+}
+async function sha256Hex(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+let DEL_BUSY = false;
+async function delRun(k) {
+  if (DEL_BUSY) return;
+  const o = DEL_OPTS[k], pw = $('delPw').value;
+  if (!pw) return toast('পাসওয়ার্ড দিন');
+  if (!window.crypto || !crypto.subtle) return toast('এই ব্রাউজারে পাসওয়ার্ড যাচাই হচ্ছে না');
+  if (await sha256Hex(pw) !== DEL_HASH) { $('delPw').value = ''; return toast('❌ ভুল পাসওয়ার্ড'); }
+  if (!confirm('শেষবার জিজ্ঞাসা: ' + o.t + ' — সত্যিই মুছবেন? এটা আর ফেরত আসবে না।')) return;
+  DEL_BUSY = true; $('delGo').disabled = true; $('delGo').textContent = 'মুছছে...';
+  try {
+    let n = 0;
+    for (const col of o.cols) {
+      const snap = await db.collection(col).get(), docs = snap.docs;
+      for (let i = 0; i < docs.length; i += 400) {
+        const b = db.batch(); docs.slice(i, i + 400).forEach(d => b.delete(d.ref)); await b.commit(); n += Math.min(400, docs.length - i);
+      }
+    }
+    toast('✔ ' + num(n) + 'টি মুছে গেছে');
+    $('mod').hidden = true;
+  } catch (e) { toast('মুছতে পারেনি: ' + (e.code || e.message)); openDelSet(); }
+  finally { DEL_BUSY = false; }
 }
 
 /* ===== কাস্টমার-ভিত্তিক ফোল্ডারে সব মেমো ও রশিদ ড্রাইভে (JPG) ===== */
@@ -1435,14 +1486,16 @@ function hmTotals() {
     pf: H.reduce((a, x) => a + ((x.sp || 0) - (x.tp || 0)) * (x.sold || 0), 0)
   };
 }
+function hmPcs() { return { stock: H.reduce((a, x) => a + ((x.added || 0) - (x.sold || 0)), 0), sold: H.reduce((a, x) => a + (x.sold || 0), 0), added: H.reduce((a, x) => a + (x.added || 0), 0) }; }
 function hmHeadHTML() {
-  const t = hmTotals();
-  return `<div class="s3"><div><span>মোট হরমোন যুক্ত (TP)</span><b>${bn(t.add)}</b></div><div><span>মোট বিক্রি</span><b>${bn(t.sold)}</b></div><div><span>মোট লাভ</span><b style="color:${profC(t.pf)}">${bn(t.pf)}</b></div></div>`;
+  const t = hmTotals(), p = hmPcs();
+  return `<div class="s3"><div><span>🧪 স্টকে আছে (পিস)</span><b style="color:#2e7d32">${num(p.stock)}</b></div><div><span>📦 বিক্রি হয়েছে (পিস)</span><b style="color:#c62828">${num(p.sold)}</b></div><div><span>মোট যুক্ত (পিস)</span><b>${num(p.added)}</b></div></div>
+  <div class="s3"><div><span>মোট হরমোন যুক্ত (TP)</span><b>${bn(t.add)}</b></div><div><span>মোট বিক্রি</span><b>${bn(t.sold)}</b></div><div><span>মোট লাভ</span><b style="color:${profC(t.pf)}">${bn(t.pf)}</b></div></div>`;
 }
 function updHmBar() {
   const b = $('hmBar'); if (!b) return;
   b.hidden = !HM;
-  if (HM) { const t = hmTotals(); b.innerHTML = `<div class="panel" style="background:linear-gradient(160deg,#fff7e6,#fff)"><h4>🧪 হরমোন বিক্রয়</h4><div class="s3" style="margin:0"><div><span>মোট হরমোন যুক্ত (TP)</span><b>${bn(t.add)}</b></div><div><span>মোট বিক্রি</span><b>${bn(t.sold)}</b></div></div></div>`; }
+  if (HM) { const t = hmTotals(), p = hmPcs(); b.innerHTML = `<div class="panel" style="background:linear-gradient(160deg,#fff7e6,#fff)"><h4>🧪 হরমোন বিক্রয় • স্টকে ${num(p.stock)} পিস • বিক্রি ${num(p.sold)} পিস</h4><div class="s3" style="margin:0"><div><span>মোট হরমোন যুক্ত (TP)</span><b>${bn(t.add)}</b></div><div><span>মোট বিক্রি</span><b>${bn(t.sold)}</b></div></div></div>`; }
 }
 function openHormSet() { $('mod').hidden = false; renderHM(); }
 function renderHM() {
@@ -1453,7 +1506,7 @@ function renderHM() {
       <div class="row"><input id="htp" type="number" inputmode="decimal" placeholder="TP রেট (ক্রয় মূল্য)"><input id="hsp" type="number" inputmode="decimal" placeholder="বিক্রয় মূল্য"></div>
       <button style="width:100%" onclick="addHorm()">+ যোগ করুন</button></div>
     <div class="panel"><h4>📋 হরমোন তালিকা</h4>
-      ${H.map(x => `<div class="ent"><div class="l"><div><b>${esc(x.n)}</b> <small>${esc(x.w || '')}</small><br><small style="color:#6b7b73">TP ${bn(x.tp)} • বিক্রয় ${bn(x.sp)} • স্টক ${num((x.added || 0) - (x.sold || 0))} • বিক্রি -${num(x.sold || 0)}</small></div></div><div style="text-align:right"><small>লাভ</small><br><b style="color:${profC((x.sp - x.tp) * (x.sold || 0))}">${bn((x.sp - x.tp) * (x.sold || 0))}</b></div><a href="#" onclick="delHorm('${x.id}');return false">✕</a></div>`).join('') || '<small style="color:#888">এখনো কোনো হরমোন নেই</small>'}
+      ${H.map(x => `<div class="ent"><div class="l"><div><b>${esc(x.n)}</b> <small>${esc(x.w || '')}</small><br><small style="color:#6b7b73">TP ${bn(x.tp)} • বিক্রয় ${bn(x.sp)} • মোট ${num(x.added || 0)} পিস</small><br><span style="color:#2e7d32;font-weight:700">স্টকে ${num((x.added || 0) - (x.sold || 0))} পিস</span> • <span style="color:#c62828;font-weight:700">বিক্রি ${num(x.sold || 0)} পিস</span></div></div><div style="text-align:right"><small>লাভ</small><br><b style="color:${profC((x.sp - x.tp) * (x.sold || 0))}">${bn((x.sp - x.tp) * (x.sold || 0))}</b></div><a href="#" onclick="delHorm('${x.id}');return false">✕</a></div>`).join('') || '<small style="color:#888">এখনো কোনো হরমোন নেই</small>'}
     </div>
     <div class="row"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
 }
