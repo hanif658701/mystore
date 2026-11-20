@@ -829,37 +829,29 @@ async function driveSaveBlob(name, blob, mime, folders) {
   if (!r.ok) throw new Error('HTTP ' + r.status);
 }
 
-/* ===== কাস্টমার-ভিত্তিক ফোল্ডারে সব মেমো ও রশিদ ড্রাইভে ===== */
+/* ===== কাস্টমার-ভিত্তিক ফোল্ডারে সব মেমো ও রশিদ ড্রাইভে (JPG) ===== */
 const DSYNC = { run: false, stop: false };
 const safeN = t => String(t).replace(/['"\/\\]/g, '-').trim();
+const localDay = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 function dsyncItems(c) {
   const items = [], seen = {};
   (c.memos || []).slice().sort((a, b) => a.no - b.no).forEach(m =>
-    items.push({ name: safeN((m.hm ? 'হরমোন মেমো ' : 'ক্যাশ মেমো ') + m.no + ' - ' + m.date) + '.pdf', html: () => memoHTML(m) }));
+    items.push({ name: safeN((m.hm ? 'হরমোন মেমো ' : 'ক্যাশ মেমো ') + m.no + ' - ' + m.date) + '.jpg', html: () => memoHTML(m) }));
   (c.entries || []).filter(x => x.t === 'paid' || x.t === 'ppaid').slice().sort((a, b) => String(a.d).localeCompare(String(b.d))).forEach(e => {
     let nm = e.no ? 'রশিদ ' + e.no + ' - ' + e.d : 'রশিদ ' + e.d + ' - ' + e.a + ' টাকা';
     seen[nm] = (seen[nm] || 0) + 1; if (seen[nm] > 1) nm += ' (' + seen[nm] + ')';
-    items.push({ name: safeN(nm) + '.pdf', html: () => payReceiptHTML(c, e) });
+    items.push({ name: safeN(nm) + '.jpg', html: () => payReceiptHTML(c, e) });
   });
   return items;
 }
-async function dsyncPdf(box, html) {
-  const { jsPDF } = window.jspdf, PW = 210, PH = 297;
+async function dsyncImg(box, html) {
   box.innerHTML = html;
-  const cv = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff' });
-  const pdf = new jsPDF({ unit: 'mm', format: 'a4' }), pxPerMm = cv.width / PW, pagePx = Math.floor(PH * pxPerMm);
-  for (let y = 0, first = true; y < cv.height; y += pagePx) {
-    const part = document.createElement('canvas');
-    part.width = cv.width; part.height = Math.min(pagePx, cv.height - y);
-    part.getContext('2d').drawImage(cv, 0, y, cv.width, part.height, 0, 0, cv.width, part.height);
-    if (!first) pdf.addPage(); first = false;
-    pdf.addImage(part.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, PW, PW * part.height / cv.width);
-  }
-  return pdf.output('blob');
+  const cv = await html2canvas(box, { scale: 1.5, backgroundColor: '#ffffff' });
+  return await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('ছবি হয়নি')), 'image/jpeg', 0.7));
 }
 async function dsyncCreate(H, name, blob, parent) {
-  const b = 'ds' + Date.now(), meta = { name, parents: [parent], mimeType: 'application/pdf' };
-  const head = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: application/pdf\r\n\r\n';
+  const b = 'ds' + Date.now() + Math.random().toString(36).slice(2), meta = { name, parents: [parent], mimeType: 'image/jpeg' };
+  const head = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: image/jpeg\r\n\r\n';
   const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body: new Blob([head, blob, '\r\n--' + b + '--']) });
   if (r.status === 401) throw new Error('TOKEN');
   if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -874,59 +866,114 @@ async function dsyncExisting(H, parent) {
   } while (tok);
   return names;
 }
-function dsyncUI(txt, pct, done) {
-  const t = $('dsTxt'), p = $('dsBar'); if (t) t.innerHTML = txt; if (p) p.style.width = pct + '%';
-  const b = $('dsBtn'); if (b && done) { b.textContent = 'বন্ধ'; b.onclick = () => $('mod').hidden = true; }
+function driveAuthSilent() {
+  return new Promise((res, rej) => {
+    if (!GDRIVE_CLIENT_ID || !window.google || !google.accounts) return rej(new Error('no-google'));
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID, scope: 'https://www.googleapis.com/auth/drive.file', prompt: '',
+      callback: r => { if (r.error) rej(new Error(r.error)); else { GTOK = r.access_token; res(GTOK); } },
+      error_callback: e => rej(new Error((e && e.type) || 'auth'))
+    });
+    tc.requestAccessToken({ prompt: '' });
+    setTimeout(() => rej(new Error('timeout')), 15000);
+  });
 }
-async function driveSyncAll() {
-  if (DSYNC.run) return toast('আপলোড চলছে...');
+function dsyncCap() {
+  let c = $('dsCap'); if (c) return c;
+  c = document.createElement('div'); c.id = 'dsCap';
+  c.style.cssText = 'position:fixed;left:10px;right:10px;bottom:12px;z-index:90;max-width:420px;margin:auto;background:#fff;border:2px solid #6a1b9a;border-radius:14px;box-shadow:0 6px 22px #0003;padding:8px 12px;animation:rise .4s both';
+  c.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">📂</span><div style="flex:1;font-size:13px" id="dsTxt">শুরু হচ্ছে...</div><button id="dsBtn" class="red" style="width:auto;padding:4px 10px;font-size:12px" onclick="DSYNC.stop=true">⏹ থামান</button></div><div style="height:6px;background:#e3ece7;border-radius:6px;overflow:hidden;margin-top:6px"><div id="dsBar" style="height:100%;width:0;background:linear-gradient(90deg,#8e2de2,#4a00e0);transition:width .3s"></div></div>';
+  document.body.appendChild(c); return c;
+}
+function dsyncUI(txt, pct, done, keep) {
+  const c = $('dsCap'); if (!c) return;
+  $('dsTxt').innerHTML = txt; $('dsBar').style.width = pct + '%';
+  if (done) {
+    const b = $('dsBtn'); b.textContent = '✕'; b.className = 'sec'; b.onclick = () => c.remove();
+    if (!keep) setTimeout(() => { if ($('dsCap') === c) c.remove(); }, 10000);
+  }
+}
+async function dsyncMark() {
+  localStorage.setItem('dsyncDay', localDay(new Date()));
+  try { await db.collection('settings').doc('dsync').set({ day: localDay(new Date()), at: Date.now() }); } catch (e) { }
+}
+async function driveSyncAll(auto) {
+  if (DSYNC.run) { if (auto !== true) toast('আপলোড চলছে...'); return; }
   if (!GDRIVE_CLIENT_ID) return toast('গুগল ক্লায়েন্ট আইডি বসানো নেই');
   const list = C.filter(c => dsyncItems(c).length);
   const total = list.reduce((a, c) => a + dsyncItems(c).length, 0);
-  if (!total) return toast('আপলোড করার মতো মেমো/রশিদ নেই');
-  $('mod').hidden = false;
-  $('mod').innerHTML = `<div class="box popBox"><div class="popH">📂 ড্রাইভে মেমো-রশিদ আপলোড</div>
-    <p id="dsTxt" style="text-align:center">শুরু হচ্ছে...</p>
-    <div style="height:12px;background:#e3ece7;border-radius:8px;overflow:hidden"><div id="dsBar" style="height:100%;width:0;background:linear-gradient(90deg,#8e2de2,#4a00e0);transition:width .3s"></div></div>
-    <p style="font-size:12px;color:#6b7b73">ফোন বন্ধ বা অ্যাপ থেকে বের হবেন না। যেগুলো আগেই ড্রাইভে আছে সেগুলো বাদ যাবে, তাই থেমে গেলে আবার চাপলে বাকিটা থেকে চলবে।</p>
-    <div class="row"><button id="dsBtn" class="red" onclick="DSYNC.stop=true">⏹ থামান</button></div></div>`;
+  if (!total) { await dsyncMark(); return auto === true ? null : toast('আপলোড করার মতো মেমো/রশিদ নেই'); }
   DSYNC.run = true; DSYNC.stop = false;
-  let done = 0, up = 0, skip = 0, box;
+  let done = 0, up = 0, skip = 0; const boxes = [];
   try {
-    await loadScr(H2C_URL); await loadScr(JSPDF_URL);
-    const tok = await driveAuth(), H = { Authorization: 'Bearer ' + tok };
+    await loadScr(H2C_URL);
+    let tok;
+    try { tok = auto === true ? await driveAuthSilent() : await driveAuth(); }
+    catch (e) { DSYNC.run = false; if (auto === true) return dsyncAlert('tonight'); throw e; }
+    const H = { Authorization: 'Bearer ' + tok };
+    if (auto !== true) $('mod').hidden = true;
+    dsyncCap();
+    for (let i = 0; i < 3; i++) {
+      const bx = document.createElement('div');
+      bx.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:24px;color:#000;font-family:"Noto Sans Bengali","Hind Siliguri",sans-serif';
+      document.body.appendChild(bx); boxes.push(bx);
+    }
     const root = await driveFolderId(H, GDRIVE_FOLDER, null), cust = await driveFolderId(H, 'Customers', root);
-    box = document.createElement('div');
-    box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:24px;color:#000;font-family:"Noto Sans Bengali","Hind Siliguri",sans-serif';
-    document.body.appendChild(box);
     for (const c of list) {
       if (DSYNC.stop) break;
       const fid = await driveFolderId(H, safeN(idOf(c) + ' - ' + c.name), cust), ex = await dsyncExisting(H, fid);
-      for (const it of dsyncItems(c)) {
-        if (DSYNC.stop) break;
-        if (ex.has(it.name)) { skip++; done++; continue; }
-        dsyncUI('<b>' + esc(c.name) + '</b><br>' + num(done) + ' / ' + num(total) + ' • নতুন আপলোড ' + num(up), done / total * 100);
-        await dsyncCreate(H, it.name, await dsyncPdf(box, it.html()), fid);
-        up++; done++;
-      }
+      const q = dsyncItems(c).filter(it => { if (ex.has(it.name)) { skip++; done++; return false; } return true; });
+      let idx = 0;
+      await Promise.all(boxes.map(async bx => {
+        while (!DSYNC.stop) {
+          const it = q[idx++]; if (!it) break;
+          dsyncUI('<b>' + esc(c.name) + '</b> • ' + num(done) + ' / ' + num(total), done / total * 100);
+          await dsyncCreate(H, it.name, await dsyncImg(bx, it.html()), fid);
+          up++; done++;
+        }
+      }));
     }
-    const fin = DSYNC.stop ? '⏹ থামানো হয়েছে' : '✅ সম্পূর্ণ';
-    if (!DSYNC.stop) localStorage.setItem('dsyncDay', today());
-    dsyncUI(fin + '<br>নতুন আপলোড ' + num(up) + 'টি • আগে থেকেই ছিল ' + num(skip) + 'টি', DSYNC.stop ? done / total * 100 : 100, true);
+    if (!DSYNC.stop) { await dsyncMark(); const al = $('dsAlert'); if (al) al.remove(); }
+    dsyncUI((DSYNC.stop ? '⏹ থামানো হয়েছে' : '✅ ড্রাইভে আপলোড সম্পূর্ণ') + ' • নতুন ' + num(up) + 'টি, আগে ছিল ' + num(skip) + 'টি', DSYNC.stop ? done / total * 100 : 100, true);
   } catch (e) {
-    dsyncUI(e.message === 'TOKEN' ? '⚠️ গুগলের অনুমতির সময় শেষ। আবার চাপুন, বাকিটা থেকে চলবে।<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)' : '⚠️ হয়নি: ' + esc(e.message) + '<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)', done / total * 100, true);
-  } finally { if (box) box.remove(); DSYNC.run = false; }
+    DSYNC.stop = true;
+    if ($('dsCap')) dsyncUI(e.message === 'TOKEN' ? '⚠️ গুগলের অনুমতির সময় শেষ। আবার চাপুন, বাকিটা থেকে চলবে।<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)' : '⚠️ হয়নি: ' + esc(e.message) + '<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)', done / total * 100, true, true);
+    else toast('আপলোড হয়নি: ' + e.message);
+  } finally { boxes.forEach(b => b.remove()); DSYNC.run = false; }
 }
-let DSYNC_ASKED = false;
+function dsyncAlert(kind) {
+  if ($('dsAlert')) return;
+  const late = kind !== 'tonight';
+  const o = document.createElement('div'); o.id = 'dsAlert';
+  o.style.cssText = 'position:fixed;inset:0;z-index:300;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML = `<div style="background:#fff;border:4px solid #d50000;border-radius:18px;padding:20px;max-width:380px;text-align:center;animation:rise .4s both">
+    <div style="font-size:50px;animation:pvPulse 1s ease-in-out infinite">🚨</div>
+    <h3 style="color:#d50000;margin:6px 0">${late ? 'রেড অ্যালার্ট!' : 'আপলোডের সময় হয়েছে'}</h3>
+    <p style="font-size:17px;font-weight:700;color:#d50000;margin:4px 0">তথ্য ড্রাইভে আপলোড করুন</p>
+    <p style="font-size:13px;color:#555">${late ? 'গতকালের মেমো-রশিদ ড্রাইভে আপলোড হয়নি।' : 'আজকের মেমো-রশিদ এখনো ড্রাইভে তোলা হয়নি।'}</p>
+    <button id="dsaY" style="background:#d50000">এখনই আপলোড করুন</button>
+    <button id="dsaN" class="sec" style="margin-top:8px">পরে</button></div>`;
+  document.body.appendChild(o);
+  $('dsaY').onclick = () => { o.remove(); driveSyncAll(); };
+  $('dsaN').onclick = () => o.remove();
+}
+let DSYNC_ASKED = false, DSYNC_TRIED = '';
+async function dsyncCheck() {
+  let last = localStorage.getItem('dsyncDay') || '';
+  try { const d = await db.collection('settings').doc('dsync').get(); if (d.exists && String(d.data().day) > last) last = String(d.data().day); } catch (e) { }
+  const now = new Date(), ld = localDay(now), y = localDay(new Date(now.getTime() - 864e5));
+  if (last >= ld) return;
+  if (now.getHours() >= 22 && last === y) { DSYNC_TRIED = ld; driveSyncAll(true); }
+  else if (last < y) dsyncAlert('late');
+}
 function dsyncAsk() {
-  if (DSYNC_ASKED || localStorage.getItem('dsyncDay') === today()) return;
-  DSYNC_ASKED = true;
-  const d = document.createElement('div');
-  d.style.cssText = 'position:fixed;left:10px;right:10px;bottom:14px;z-index:99;background:#fff;border-radius:14px;box-shadow:0 6px 24px #0003;padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;animation:rise .5s both';
-  d.innerHTML = '<span style="flex:1;min-width:180px">📂 আজকের মেমো-রশিদ ড্রাইভে তোলা হয়নি</span><button style="width:auto;padding:8px 12px" id="dsY">এখনই তুলুন</button><button class="sec" style="width:auto;padding:8px 12px" id="dsN">পরে</button>';
-  document.body.appendChild(d);
-  $('dsY').onclick = () => { d.remove(); driveSyncAll(); };
-  $('dsN').onclick = () => d.remove();
+  if (DSYNC_ASKED) return; DSYNC_ASKED = true;
+  dsyncCheck();
+  setInterval(() => {
+    const now = new Date(), ld = localDay(now);
+    if (now.getHours() < 22 || DSYNC_TRIED === ld || DSYNC.run || localStorage.getItem('dsyncDay') === ld || !C.length) return;
+    DSYNC_TRIED = ld; driveSyncAll(true);
+  }, 60000);
 }
 async function driveCustomer() {
   const c = C.find(x => x.id === curId()); if (!c) return;
