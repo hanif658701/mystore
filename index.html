@@ -102,6 +102,12 @@ footer h4{margin:0 0 6px;color:var(--g1)}
 @media(min-width:560px){.salegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.memoCol{margin-top:0;position:sticky;top:12px}}
 @media print{body>*:not(#pr){display:none!important}#pr{display:block}table{width:100%;border-collapse:collapse}td,th{border:1px solid #444;padding:4px;font-size:13px;text-align:left}}
 @keyframes popIn{0%{opacity:0;transform:translateY(30px) scale(.85)}60%{transform:translateY(-6px) scale(1.03)}100%{opacity:1;transform:none}}
+.prevBig{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;animation:rise .6s both}
+.prevBig small{color:#c62828;font-weight:700;font-size:12px}
+.prevBig .pvA{color:#d50000;font-size:34px;font-weight:800;line-height:1.1;text-shadow:0 2px 10px #d5000033;animation:pvPulse 1.8s ease-in-out infinite}
+@keyframes pvPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.pcard{flex-wrap:wrap}
+.sumH{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid #e3ece7;font-size:14px}
 @keyframes shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 .box.popBox{background:linear-gradient(160deg,#ffffff,#eefcf6);animation:popIn .5s both}
 .popH{background:linear-gradient(90deg,#11998e,#38ef7d,#11998e);background-size:200% auto;animation:shine 3s linear infinite;color:#fff;border-radius:14px;padding:12px;text-align:center;font-size:18px;font-weight:700;margin-bottom:12px}
@@ -245,10 +251,11 @@ function countUp(el, to, f) {
 
 auth.onAuthStateChanged(u => {
   $('login').hidden = !!u; $('app').hidden = !u;
-  if (u) loadSet(), loadProd(), loadComp(), loadHorm(), loadExp(), loadAdmin(), loadCustId(), loadBackupMeta(), db.collection('customers').orderBy('name').onSnapshot(s => {
+  if (u) loadSet(), loadProd(), loadComp(), loadHorm(), loadLiq(), loadExp(), loadAdmin(), loadCustId(), loadBackupMeta(), db.collection('customers').orderBy('name').onSnapshot(s => {
     C = s.docs.map(d => ({ id: d.id, ...d.data() }));
     if (CIDV2 === false) migrateCid();
     route(true);
+    if (C.length) setTimeout(dsyncAsk, 2500);
   }, e => toast('ডাটা লোড হয়নি: ' + e.code));
 });
 window.onhashchange = () => route(false);
@@ -302,7 +309,8 @@ function openProfile(id, refresh) {
   const ents = (c.entries || []).map((x, i) => ({ ...x, i })).sort((a, b) => b.d.localeCompare(a.d) || b.i - a.i);
   $('vProf').innerHTML = `<div class="prof">
     <button class="back" onclick="location.hash=''">← সব কাস্টমার</button>
-    <div class="pcard" style="position:relative"><button style="position:absolute;top:8px;right:8px;width:auto;padding:6px 10px;font-size:12px" onclick="addPrevDue()">+ পূর্বের বছরের বকেয়া বিল</button><label class="avl" title="ছবি তুলুন বা বাছুন">${av(c, 1)}<span class="cam">📷</span><input type="file" accept="image/*" hidden onchange="upPhoto(this)"></label><div><h2>${esc(c.name)}</h2><p>📍 ${esc(c.address)}</p><p>📞 ${esc(c.phone)}</p><span class="tag">${idOf(c)}</span><span class="tag">পূর্বের বছরের বকেয়া: ${bn(alloc(c).prevRem)}</span>${(() => { const hi = hormInfo(c); return `<span class="tag" style="background:#ffe5e5;color:#c62828;cursor:pointer;font-weight:700" onclick="showHormPop('${c.id}')">🧪 হরমোন ${num(hi.pcs)} টি • বাকি ${bn(hi.rem)}</span>`; })()}${c.nk ? ` <span class="tag">ডাকনাম: ${esc(c.nk)}</span>` : ''}${c.photo ? `<br><a href="#c=${c.id}" onclick="rmPhoto();return false" style="font-size:13px;color:#c62828">ছবি মুছুন</a>` : ''}</div></div>
+    <div class="pcard" style="position:relative"><label class="avl" title="ছবি তুলুন বা বাছুন">${av(c, 1)}<span class="cam">📷</span><input type="file" accept="image/*" hidden onchange="upPhoto(this)"></label><div><h2>${esc(c.name)}</h2><p>📍 ${esc(c.address)}</p><p>📞 ${esc(c.phone)}</p><span class="tag">${idOf(c)}</span>${(() => { const hi = hormInfo(c); return `<span class="tag" style="background:#ffe5e5;color:#c62828;cursor:pointer;font-weight:700" onclick="showHormPop('${c.id}')">🧪 হরমোন ${num(hi.pcs)} টি • বাকি ${bn(hi.rem)}</span>`; })()}${c.nk ? ` <span class="tag">ডাকনাম: ${esc(c.nk)}</span>` : ''}${c.photo ? `<br><a href="#c=${c.id}" onclick="rmPhoto();return false" style="font-size:13px;color:#c62828">ছবি মুছুন</a>` : ''}</div>
+      <div class="prevBig"><small>পূর্বের বছরের বাকি</small><span class="pvA" id="pvAmt">${bn(0)}</span><button style="width:auto;padding:5px 10px;font-size:12px" onclick="addPrevDue()">+ পূর্বের বছরের বকেয়া বিল</button></div></div>
     <div class="s3">
       <div><span>মোট বিল</span><b>${bn(sum(c, 'due'))}</b></div>
       <div><span>জমা</span><b style="color:var(--grn)">${bn(sum(c, 'paid'))}</b></div>
@@ -313,7 +321,7 @@ function openProfile(id, refresh) {
       <input id="en" placeholder="নোট (ঐচ্ছিক)" value="${esc(keep?.n || '')}">
       <div class="row"><button class="red" onclick="addE('due')">+ বকেয়া</button><button onclick="addE('paid')">+ জমা</button></div>
     </div>
-    <button style="width:100%;margin-bottom:8px" onclick="driveCustomer()">📄 এই কাস্টমারের সব মেমো PDF হিসেবে ড্রাইভে</button>
+    <button style="width:100%;margin-bottom:8px" onclick="driveCustomer()">📄 এই কাস্টমারের PDF (মেমো + রশিদ) ড্রাইভে</button>
     <button style="width:100%;margin-bottom:8px" onclick="payPrevFromProfile()">💰 পূর্বের বছরের বাকি পরিশোধ করুন</button>
     <div class="panel"><h4>🧾 মেমো তালিকা (এডিট / পণ্য রিটার্ন)</h4>
       ${(c.memos || []).slice().reverse().map(m => `<div class="ent"><div class="l"><div><b>মেমো ${num(m.no)}</b> <small style="color:#6b7b73">${bd(m.date)}</small><br><small style="color:#6b7b73">${m.hm ? '🧪 হরমোন' : '🛒 বিষ'} • ${m.cash ? 'নগদ' : 'বাকি'} • ${(m.items || []).map(x => esc(x.n) + ' × ' + num(x.q)).join(', ')}</small></div></div><b>${bn(m.total)}</b><button class="sec" style="width:auto;padding:6px 10px" onclick="memoEditOpen(${m.no})">এডিট</button></div>`).join('') || '<small style="color:#888">কোনো মেমো নেই</small>'}
@@ -329,6 +337,7 @@ function openProfile(id, refresh) {
     </div>
     <div class="panel"><h4>🧾 ক্যাশ মেমো</h4>${(c.memos || []).slice().reverse().map(m => `<div class="ent" style="cursor:pointer" onclick="showMemo(C.find(x => x.id === '${c.id}').memos.find(z => z.no === ${m.no}), true)"><div class="l"><div><b>মেমো নং ${num(m.no)}</b> <small style="color:#6b7b73">${bd(m.date)}</small></div></div><b>${bn(m.total)}</b></div>`).join('') || '<small style="color:#888">কোনো মেমো নেই</small>'}</div>
     <button class="red" style="width:100%" onclick="delC()">🗑 কাস্টমার মুছুন</button></div>`;
+  { const pv = $('pvAmt'), v = Math.round(alloc(c).prevRem); if (pv) { if (refresh) { pv._v = v; pv.textContent = bn(v); } else countUp(pv, v); } }
   if (!refresh) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -411,12 +420,35 @@ function openSet() {
     <div class="dash">${DASH.map(d => `<button class="dbtn" style="background:${d[2]}" onclick="${d[1]}"><span class="dic">${d[0]}</span>${d[3]}</button>`).join('')}</div>
     <div class="row" style="margin-top:12px"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
 }
-function setTabs(a) { return `<h3 style="margin-top:0">⚙️ সেটিং</h3><div class="row"><button class="sec" onclick="openSet()">🏠 ড্যাশবোর্ড</button><button class="${a === 'sms' ? '' : 'sec'}" onclick="openSmsSet()">📩 SMS</button><button class="${a === 'memo' ? '' : 'sec'}" onclick="openMemoSet()">🧾 ক্যাশ মেমো</button><button class="${a === 'comp' ? '' : 'sec'}" onclick="openCompSet()">🏭 কোম্পানি ও স্টক</button><button class="${a === 'profit' ? '' : 'sec'}" onclick="openProfitSet()">💰 প্রফিট</button><button class="${a === 'hm' ? '' : 'sec'}" onclick="openHormSet()">🧪 হরমোন</button><button class="${a === 'act' ? '' : 'sec'}" onclick="openAct()">👥 কাস্টমার অ্যাক্টিভিটি</button><button class="${a === 'exp' ? '' : 'sec'}" onclick="openExp()">🏢 ব্যয়</button></div>`; }
+function setTabs(a) { return `<h3 style="margin-top:0">⚙️ সেটিং</h3><div class="row"><button class="sec" onclick="openSet()">🏠 ড্যাশবোর্ড</button><button class="${a === 'sms' ? '' : 'sec'}" onclick="openSmsSet()">📩 SMS</button><button class="${a === 'memo' ? '' : 'sec'}" onclick="openMemoSet()">🧾 ক্যাশ মেমো</button><button class="${a === 'comp' ? '' : 'sec'}" onclick="openCompSet()">🏭 কোম্পানি ও স্টক</button><button class="${a === 'profit' ? '' : 'sec'}" onclick="openProfitSet()">💰 প্রফিট</button><button class="${a === 'hm' ? '' : 'sec'}" onclick="openHormSet()">🧪 হরমোন</button><button class="${a === 'lq' ? '' : 'sec'}" onclick="openLiqSet()">💧 লিকুইড</button><button class="${a === 'act' ? '' : 'sec'}" onclick="openAct()">👥 কাস্টমার অ্যাক্টিভিটি</button><button class="${a === 'exp' ? '' : 'sec'}" onclick="openExp()">🏢 ব্যয়</button></div>`; }
+
+/* ===== বিষ + লিকুইড + হরমোন একত্রে লাভ-ক্ষতি ===== */
+function extraTot() { const h = hmTotals(), l = lqTotals(); return { add: Math.round(h.add + l.add), sold: Math.round(h.sold + l.sold), pf: Math.round(h.pf + l.pf) }; }
+function allProfitHTML() {
+  const T = k => CO.reduce((a, c) => a + k(c), 0);
+  const vi = { tp: T(cSumP), sold: T(cSumS), pf: T(cProf), l: '🏭 বিষ (সব কোম্পানি)' };
+  const lq = { ...lqTotals(), l: '💧 লিকুইড' }, hm = { ...hmTotals(), l: '🧪 হরমোন' };
+  vi.add = vi.tp;
+  const rows = [vi, lq, hm], GP = rows.reduce((a, x) => a + x.pf, 0), GA = rows.reduce((a, x) => a + x.add, 0), GS = rows.reduce((a, x) => a + x.sold, 0);
+  return `<div class="panel"><h4>📊 সব ক্যাটাগরির লাভ-ক্ষতি (বিষ + লিকুইড + হরমোন)</h4>
+    ${rows.map(x => `<div class="sumH"><div><b>${x.l}</b><br><small style="color:#6b7b73">ক্রয় (TP) ${bn(Math.round(x.add))} • বিক্রয় ${bn(Math.round(x.sold))}</small></div><b style="color:${profC(x.pf)}">${x.pf >= 0 ? 'লাভ' : 'ক্ষতি'} ${bn(Math.round(Math.abs(x.pf)))}</b></div>`).join('')}
+    <div class="sumH" style="border:0;font-size:16px"><b>সর্বমোট</b><b style="color:${profC(GP)}">${GP >= 0 ? 'লাভ' : 'ক্ষতি'} ${bn(Math.round(Math.abs(GP)))}</b></div>
+    <small style="color:#6b7b73">মোট ক্রয় ${bn(Math.round(GA))} • মোট বিক্রয় ${bn(Math.round(GS))}</small></div>`;
+}
+function billPop() {
+  const A = C.map(c => alloc(c)), tot = f => A.reduce((a, x) => a + (x[f] || 0), 0);
+  showPop('💰 বিল আদায় সারাংশ', [
+    ['চলমান বাকি আদায় (বিষ)', Math.max(0, tot('curColl') - tot('hmColl')), 'linear-gradient(135deg,#f7971e,#ffb347)'],
+    ['বকেয়া বাকিয়া আদায় (পূর্বের বছর)', tot('prevColl'), 'linear-gradient(135deg,#43cea2,#185a9d)'],
+    ['হরমোনের বাকি আদায়', Math.max(0, tot('hmColl')), 'linear-gradient(135deg,#8e2de2,#4a00e0)']
+  ]);
+}
 function openProfitSet() {
-  const T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP), SS = T(cSumS), PF = T(cProf);
+  const X = extraTot(), T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP) + X.add, SS = T(cSumS) + X.sold, PF = T(cProf) + X.pf;
   $('mod').hidden = false;
   $('mod').innerHTML = `<div class="box wide">${setTabs('profit')}
     <div class="s3"><div><span>মোট ক্রয় (TP)</span><b>${bn(SP)}</b></div><div><span>মোট বিক্রয়</span><b>${bn(SS)}</b></div><div><span>মোট প্রফিট</span><b style="color:${profC(PF)}">${bn(PF)}</b></div></div>
+    ${allProfitHTML()}
     <div class="panel"><h4>কোম্পানি অনুযায়ী</h4>
       ${CO.map(c => `<div class="ent"><div class="l"><div><b>${esc(c.name)}</b></div></div><small style="color:#6b7b73">ক্রয় ${bn(cSumP(c))} • বিক্রয় ${bn(cSumS(c))}</small><b style="color:${profC(cProf(c))}">লাভ ${bn(cProf(c))}</b></div>`).join('') || '<small style="color:#888">এখনো কোনো কোম্পানি নেই</small>'}
     </div>
@@ -600,17 +632,19 @@ function rSel() {
 }
 function allProds() {
   const co = CO.flatMap(c => (c.products || []).map((x, i) => ({ id: 'co|' + c.id + '|' + i, n: x.n, w: x.w, p: x.sp || 0, tp: x.p || 0, nk: x.nk || '', co: c.name, cid: c.id })));
-  return [...P, ...co, ...H.map(x => ({ id: 'hm|' + x.id, n: x.n, w: x.w, p: x.sp || 0, tp: x.tp || 0, nk: '', co: 'হরমোন', cid: x.id, hm: true, stock: (x.added || 0) - (x.sold || 0) }))];
+  return [...P, ...co, ...H.map(x => ({ id: 'hm|' + x.id, n: x.n, w: x.w, p: x.sp || 0, tp: x.tp || 0, nk: '', co: 'হরমোন', cid: x.id, hm: true, stock: (x.added || 0) - (x.sold || 0) })),
+    ...LQ.map(x => ({ id: 'lq|' + x.id, n: x.n, w: '', p: x.sp || 0, tp: x.tp || 0, nk: x.nk || '', co: 'লিকুইড', cid: x.id, lq: true, stock: (x.added || 0) - (x.sold || 0) }))];
 }
 function stockOf(n) { return CO.reduce((a, c) => a + (c.purchases || []).filter(x => x.n === n).reduce((b, x) => b + x.q, 0), 0); }
 function rPq() {
   const q = $('pq').value.trim();
   if (!q) { $('pres').innerHTML = allProds().length ? '<p class="nt">পণ্যের নাম লিখুন (বাংলা অথবা ইংরেজি ডাকনাম, যেমন: abada)</p>' : '<p class="nt">আগে "পণ্য" ট্যাব থেকে পণ্য যোগ করুন</p>'; return; }
   const L = allProds().filter(x => (HM ? !!x.hm : !x.hm) && mP(x, q)).slice(0, 30);
-  $('pres').innerHTML = L.map(x => `<div class="card" onclick="addCart('${x.id}')"><div class="info"><b>${esc(x.n)}</b><small>${esc(x.w)}${x.co ? ' • ' + esc(x.co) : ''}${x.co ? ' • স্টক: ' + num(x.hm ? x.stock : stockIn(CO.find(z => z.id === x.cid) || {}, x.n)) : ''}</small></div><div class="amt">${x.p ? bn(x.p) : '<small style="color:#c62828">দাম নেই</small>'}</div><button style="padding:6px 14px">+</button></div>`).join('') || '<p class="nt">কোনো পণ্য পাওয়া যায়নি</p>';
+  $('pres').innerHTML = L.map(x => `<div class="card" onclick="addCart('${x.id}')"><div class="info"><b>${esc(x.n)}</b><small>${esc(x.w)}${x.co ? ' • ' + esc(x.co) : ''}${x.co ? ' • স্টক: ' + num(x.hm || x.lq ? x.stock : stockIn(CO.find(z => z.id === x.cid) || {}, x.n)) + (x.lq ? ' লিটার' : '') : ''}</small></div><div class="amt">${x.p ? bn(x.p) + (x.lq ? '<small>/লিটার</small>' : '') : '<small style="color:#c62828">দাম নেই</small>'}</div><button style="padding:6px 14px">+</button></div>`).join('') || '<p class="nt">কোনো পণ্য পাওয়া যায়নি</p>';
 }
 function addCart(id) {
   const x = allProds().find(z => z.id === id), f = cart.find(c => c.id === id);
+  if (x && x.lq) return lqPick(id);
   if (!x.p) return toast('আগে কোম্পানি প্রোফাইলে বিক্রয় মূল্য সেট করুন');
   if (!!x.hm !== HM) return toast(HM ? 'হরমোন বিক্রয়ে শুধু হরমোন পণ্য যোগ হবে' : 'হরমোন পণ্য আলাদা হরমোন বিক্রয় থেকে যোগ করুন');
   if (x.hm) { if (x.stock - (f ? f.q : 0) <= 0) return toast('হরমোনের স্টকে আর নেই'); }
@@ -653,22 +687,25 @@ function alloc(c) {
   const hmNos = new Set((c.memos || []).filter(m => m.hm).map(m => 'ক্যাশ মেমো #' + num(m.no)));
   const dues = E.filter(x => x.t === 'due');
   const pdueT = sumT(x => x.t === 'pdue');
-  const specCur = sumT(x => x.t === 'paid' && x.rc && !x.prev);
+  const specCur = sumT(x => x.t === 'paid' && x.rc && !x.prev && !x.hm), specHm = sumT(x => x.t === 'paid' && x.rc && x.hm);
   const unspec = sumT(x => x.t === 'paid' && !x.rc);
   const specPrev = sumT(x => x.t === 'ppaid');
   const prevPool = pdueT - specPrev;
   const unToPrev = Math.max(0, Math.min(unspec, prevPool));
   const prevRem = prevPool - unToPrev;
   let pay = specCur + (unspec - unToPrev);
-  let curRem = 0, poRem = 0, hmRem = 0;
-  dues.forEach(x => {
-    const take = Math.min(x.a, pay); pay -= take;
-    const r = x.a - take; curRem += r;
-    if (x.hm || hmNos.has(x.n)) hmRem += r; else poRem += r;
+  let curRem = 0, poRem = 0, hmRem = 0, hmDue = 0;
+  const isHm = x => x.hm || hmNos.has(x.n);
+  let hp = specHm;
+  const rem = dues.map(x => { let r = x.a; if (isHm(x)) { const t = Math.min(r, hp); hp -= t; r -= t; } return r; });
+  dues.forEach((x, i) => {
+    const take = Math.min(rem[i], pay); pay -= take;
+    const r = rem[i] - take; curRem += r;
+    if (isHm(x)) { hmDue += x.a; hmRem += r; } else poRem += r;
   });
-  curRem -= pay; poRem -= pay;
-  const hr = Math.min(sumT(x => x.t === 'hret'), Math.max(0, hmRem)); curRem -= hr; hmRem -= hr;
-  return { curRem, prevRem, poRem, hmRem, curColl: specCur + (unspec - unToPrev), prevColl: specPrev + unToPrev };
+  curRem -= pay + hp; poRem -= pay; hmRem -= hp;
+  const hmColl = hmDue - hmRem; const hr = Math.min(sumT(x => x.t === 'hret'), Math.max(0, hmRem)); curRem -= hr; hmRem -= hr;
+  return { curRem, prevRem, poRem, hmRem, hmColl, curColl: specCur + specHm + (unspec - unToPrev), prevColl: specPrev + unToPrev };
 }
 function hormInfo(c) {
   const hm = (c.memos || []).filter(m => m.hm), rets = (c.entries || []).filter(x => x.t === 'hret');
@@ -721,25 +758,58 @@ function loadScr(src) {
     document.head.appendChild(sc);
   });
 }
+function custStatementHTML(c) {
+  const A = alloc(c), sales = (c.memos || []).reduce((a, m) => a + (m.total || 0), 0);
+  const lbl = { due: 'বাকি বিক্রয়', paid: 'জমা / বিল আদায়', ppaid: 'পূর্বের বছরের বাকি পরিশোধ', pdue: 'পূর্বের বছরের বাকি যোগ', hret: 'হরমোন ফেরত' };
+  const rows = (c.entries || []).filter(x => lbl[x.t]).slice().sort((a, b) => String(a.d).localeCompare(String(b.d)));
+  return `<h2 style="text-align:center;margin:0">${SHOP}</h2>
+  <p style="text-align:center;margin:2px;font-size:13px">পরিচালক: ${OWNER} • ${ADDR}</p>
+  <h3 style="text-align:center;margin:10px 0;border:1px solid #888;border-radius:6px;padding:4px">কাস্টমার হিসাব বিবরণী</h3>
+  <p style="font-size:15px;margin:6px 0"><b>${esc(c.name)}</b> (${idOf(c)})<br>📍 ${esc(c.address || '')}<br>📞 ${esc(c.phone || '')}</p>
+  <table class="mt"><tr><th>মোট বিক্রয়</th><th>চলমান বাকি</th><th>পূর্বের বছরের বাকি</th><th>হরমোন বাকি</th><th>মোট আদায়</th></tr>
+  <tr><td>${bn(sales)}</td><td>${bn(A.curRem)}</td><td>${bn(A.prevRem)}</td><td>${bn(A.hmRem)}</td><td>${bn(A.curColl + A.prevColl)}</td></tr></table>
+  <h4 style="margin:14px 0 6px">লেনদেনের তালিকা</h4>
+  <table class="mt"><tr><th>তারিখ</th><th>বিবরণ</th><th>টাকা</th></tr>
+  ${rows.map(x => `<tr><td>${bd(x.d)}</td><td>${lbl[x.t]}${x.n ? ' — ' + esc(x.n) : ''}</td><td>${bn(x.a)}</td></tr>`).join('') || '<tr><td colspan="3">কোনো লেনদেন নেই</td></tr>'}</table>`;
+}
+function payReceiptHTML(c, e) {
+  const ph = (MT.phone || '').trim() || DM.phone;
+  return `<h2 style="text-align:center;margin:0">${SHOP}</h2>
+  <p style="text-align:center;margin:2px;font-size:13px">পরিচালক: ${OWNER}<br>${ADDR}<br>মোবাইল: ${esc(ph)}</p>
+  <h3 style="text-align:center;margin:10px 0;border:1px solid #888;border-radius:6px;padding:4px">আদায়ের রশিদ</h3>
+  <p>তারিখ: ${bd(e.d)}${e.no ? ' • রশিদ নং: ' + num(e.no) : ''}</p>
+  <p style="font-size:15px">কাস্টমারের নাম: <b>${esc(c.name)}</b><br>মোবাইল: ${esc(c.phone || '')}<br>ঠিকানা: ${esc(c.address || '')}</p>
+  <table class="mt"><tr><th>বিবরণ</th><th>আদায় (টাকা)</th></tr><tr><td>${e.t === 'ppaid' ? 'পূর্বের বছরের বাকি পরিশোধ' : e.hm ? 'হরমোনের বাকি পরিশোধ' : 'বকেয়া বিল পরিশোধ / জমা'}${e.n ? ' — ' + esc(e.n) : ''}</td><td>${bn(e.a)}</td></tr></table>
+  <div style="display:flex;justify-content:space-between;margin-top:40px;gap:10px">
+    <div style="text-align:center;width:45%;border-top:1px solid #444;padding-top:4px">কাস্টমারের স্বাক্ষর</div>
+    <div style="text-align:center;width:45%;height:90px;border:1px dashed #888;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px">প্রতিষ্ঠানের শীল ও স্বাক্ষর</div>
+  </div>`;
+}
 async function memosPdfBlob(c) {
-  const memos = (c.memos || []).slice().sort((a, b) => a.no - b.no);
-  if (!memos.length) throw new Error('এই কাস্টমারের কোনো মেমো নেই');
   await loadScr(H2C_URL); await loadScr(JSPDF_URL);
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
   const PW = 210, PH = 297;
+  const pages = [custStatementHTML(c)];
+  (c.memos || []).slice().sort((a, b) => a.no - b.no).forEach(m => pages.push(memoHTML(m)));
+  (c.entries || []).filter(x => x.t === 'paid' || x.t === 'ppaid').slice().sort((a, b) => String(a.d).localeCompare(String(b.d))).forEach(e => pages.push(payReceiptHTML(c, e)));
   const box = document.createElement('div');
   box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:24px;color:#000;font-family:"Noto Sans Bengali","Hind Siliguri",sans-serif';
   document.body.appendChild(box);
   try {
-    for (let i = 0; i < memos.length; i++) {
-      box.innerHTML = memoHTML(memos[i]);
+    let first = true;
+    for (const html of pages) {
+      box.innerHTML = html;
       const cv = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff' });
-      const ratio = cv.height / cv.width;
-      let w = PW, h = PW * ratio;
-      if (h > PH) { h = PH; w = PH / ratio; }
-      if (i > 0) pdf.addPage();
-      pdf.addImage(cv.toDataURL('image/jpeg', 0.92), 'JPEG', (PW - w) / 2, 0, w, h);
+      const pxPerMm = cv.width / PW, pagePx = Math.floor(PH * pxPerMm);
+      for (let y = 0; y < cv.height; y += pagePx) {
+        const part = document.createElement('canvas');
+        part.width = cv.width; part.height = Math.min(pagePx, cv.height - y);
+        part.getContext('2d').drawImage(cv, 0, y, cv.width, part.height, 0, 0, cv.width, part.height);
+        if (!first) pdf.addPage();
+        first = false;
+        pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PW * part.height / cv.width);
+      }
     }
     return pdf.output('blob');
   } finally { box.remove(); }
@@ -758,10 +828,110 @@ async function driveSaveBlob(name, blob, mime, folders) {
   const r = await fetch(url, { method: ex ? 'PATCH' : 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body });
   if (!r.ok) throw new Error('HTTP ' + r.status);
 }
+
+/* ===== কাস্টমার-ভিত্তিক ফোল্ডারে সব মেমো ও রশিদ ড্রাইভে ===== */
+const DSYNC = { run: false, stop: false };
+const safeN = t => String(t).replace(/['"\/\\]/g, '-').trim();
+function dsyncItems(c) {
+  const items = [], seen = {};
+  (c.memos || []).slice().sort((a, b) => a.no - b.no).forEach(m =>
+    items.push({ name: safeN((m.hm ? 'হরমোন মেমো ' : 'ক্যাশ মেমো ') + m.no + ' - ' + m.date) + '.pdf', html: () => memoHTML(m) }));
+  (c.entries || []).filter(x => x.t === 'paid' || x.t === 'ppaid').slice().sort((a, b) => String(a.d).localeCompare(String(b.d))).forEach(e => {
+    let nm = e.no ? 'রশিদ ' + e.no + ' - ' + e.d : 'রশিদ ' + e.d + ' - ' + e.a + ' টাকা';
+    seen[nm] = (seen[nm] || 0) + 1; if (seen[nm] > 1) nm += ' (' + seen[nm] + ')';
+    items.push({ name: safeN(nm) + '.pdf', html: () => payReceiptHTML(c, e) });
+  });
+  return items;
+}
+async function dsyncPdf(box, html) {
+  const { jsPDF } = window.jspdf, PW = 210, PH = 297;
+  box.innerHTML = html;
+  const cv = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff' });
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' }), pxPerMm = cv.width / PW, pagePx = Math.floor(PH * pxPerMm);
+  for (let y = 0, first = true; y < cv.height; y += pagePx) {
+    const part = document.createElement('canvas');
+    part.width = cv.width; part.height = Math.min(pagePx, cv.height - y);
+    part.getContext('2d').drawImage(cv, 0, y, cv.width, part.height, 0, 0, cv.width, part.height);
+    if (!first) pdf.addPage(); first = false;
+    pdf.addImage(part.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, PW, PW * part.height / cv.width);
+  }
+  return pdf.output('blob');
+}
+async function dsyncCreate(H, name, blob, parent) {
+  const b = 'ds' + Date.now(), meta = { name, parents: [parent], mimeType: 'application/pdf' };
+  const head = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: application/pdf\r\n\r\n';
+  const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { ...H, 'Content-Type': 'multipart/related; boundary=' + b }, body: new Blob([head, blob, '\r\n--' + b + '--']) });
+  if (r.status === 401) throw new Error('TOKEN');
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+}
+async function dsyncExisting(H, parent) {
+  const names = new Set(); let tok = '';
+  do {
+    const q = encodeURIComponent("'" + parent + "' in parents and trashed=false");
+    const r = await fetch('https://www.googleapis.com/drive/v3/files?pageSize=1000&fields=nextPageToken,files(name)&q=' + q + (tok ? '&pageToken=' + tok : ''), { headers: H });
+    if (r.status === 401) throw new Error('TOKEN');
+    const j = await r.json(); (j.files || []).forEach(f => names.add(f.name)); tok = j.nextPageToken || '';
+  } while (tok);
+  return names;
+}
+function dsyncUI(txt, pct, done) {
+  const t = $('dsTxt'), p = $('dsBar'); if (t) t.innerHTML = txt; if (p) p.style.width = pct + '%';
+  const b = $('dsBtn'); if (b && done) { b.textContent = 'বন্ধ'; b.onclick = () => $('mod').hidden = true; }
+}
+async function driveSyncAll() {
+  if (DSYNC.run) return toast('আপলোড চলছে...');
+  if (!GDRIVE_CLIENT_ID) return toast('গুগল ক্লায়েন্ট আইডি বসানো নেই');
+  const list = C.filter(c => dsyncItems(c).length);
+  const total = list.reduce((a, c) => a + dsyncItems(c).length, 0);
+  if (!total) return toast('আপলোড করার মতো মেমো/রশিদ নেই');
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box popBox"><div class="popH">📂 ড্রাইভে মেমো-রশিদ আপলোড</div>
+    <p id="dsTxt" style="text-align:center">শুরু হচ্ছে...</p>
+    <div style="height:12px;background:#e3ece7;border-radius:8px;overflow:hidden"><div id="dsBar" style="height:100%;width:0;background:linear-gradient(90deg,#8e2de2,#4a00e0);transition:width .3s"></div></div>
+    <p style="font-size:12px;color:#6b7b73">ফোন বন্ধ বা অ্যাপ থেকে বের হবেন না। যেগুলো আগেই ড্রাইভে আছে সেগুলো বাদ যাবে, তাই থেমে গেলে আবার চাপলে বাকিটা থেকে চলবে।</p>
+    <div class="row"><button id="dsBtn" class="red" onclick="DSYNC.stop=true">⏹ থামান</button></div></div>`;
+  DSYNC.run = true; DSYNC.stop = false;
+  let done = 0, up = 0, skip = 0, box;
+  try {
+    await loadScr(H2C_URL); await loadScr(JSPDF_URL);
+    const tok = await driveAuth(), H = { Authorization: 'Bearer ' + tok };
+    const root = await driveFolderId(H, GDRIVE_FOLDER, null), cust = await driveFolderId(H, 'Customers', root);
+    box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:24px;color:#000;font-family:"Noto Sans Bengali","Hind Siliguri",sans-serif';
+    document.body.appendChild(box);
+    for (const c of list) {
+      if (DSYNC.stop) break;
+      const fid = await driveFolderId(H, safeN(idOf(c) + ' - ' + c.name), cust), ex = await dsyncExisting(H, fid);
+      for (const it of dsyncItems(c)) {
+        if (DSYNC.stop) break;
+        if (ex.has(it.name)) { skip++; done++; continue; }
+        dsyncUI('<b>' + esc(c.name) + '</b><br>' + num(done) + ' / ' + num(total) + ' • নতুন আপলোড ' + num(up), done / total * 100);
+        await dsyncCreate(H, it.name, await dsyncPdf(box, it.html()), fid);
+        up++; done++;
+      }
+    }
+    const fin = DSYNC.stop ? '⏹ থামানো হয়েছে' : '✅ সম্পূর্ণ';
+    if (!DSYNC.stop) localStorage.setItem('dsyncDay', today());
+    dsyncUI(fin + '<br>নতুন আপলোড ' + num(up) + 'টি • আগে থেকেই ছিল ' + num(skip) + 'টি', DSYNC.stop ? done / total * 100 : 100, true);
+  } catch (e) {
+    dsyncUI(e.message === 'TOKEN' ? '⚠️ গুগলের অনুমতির সময় শেষ। আবার চাপুন, বাকিটা থেকে চলবে।<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)' : '⚠️ হয়নি: ' + esc(e.message) + '<br>(এ পর্যন্ত নতুন ' + num(up) + 'টি)', done / total * 100, true);
+  } finally { if (box) box.remove(); DSYNC.run = false; }
+}
+let DSYNC_ASKED = false;
+function dsyncAsk() {
+  if (DSYNC_ASKED || localStorage.getItem('dsyncDay') === today()) return;
+  DSYNC_ASKED = true;
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;left:10px;right:10px;bottom:14px;z-index:99;background:#fff;border-radius:14px;box-shadow:0 6px 24px #0003;padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;animation:rise .5s both';
+  d.innerHTML = '<span style="flex:1;min-width:180px">📂 আজকের মেমো-রশিদ ড্রাইভে তোলা হয়নি</span><button style="width:auto;padding:8px 12px" id="dsY">এখনই তুলুন</button><button class="sec" style="width:auto;padding:8px 12px" id="dsN">পরে</button>';
+  document.body.appendChild(d);
+  $('dsY').onclick = () => { d.remove(); driveSyncAll(); };
+  $('dsN').onclick = () => d.remove();
+}
 async function driveCustomer() {
   const c = C.find(x => x.id === curId()); if (!c) return;
   if (!GDRIVE_CLIENT_ID) return toast('গুগল ক্লায়েন্ট আইডি বসানো নেই');
-  const name = (idOf(c) + ' - ' + c.name + ' - ' + today() + ' - মেমো.pdf').replace(/[\/\\]/g, '-');
+  const name = (idOf(c) + ' - ' + c.name + ' - ' + today() + ' - হিসাব.pdf').replace(/[\/\\]/g, '-');
   try {
     toast('PDF তৈরি হচ্ছে...');
     const blob = await memosPdfBlob(c);
@@ -785,7 +955,7 @@ function loadBackupMeta() {
 function buildBackup() {
   return {
     app: 'mesars-full-enterprise', date: today(),
-    customers: C.map(c => ({ ...c })), companies: CO.map(c => ({ ...c })), hormone: H.map(x => ({ ...x })),
+    customers: C.map(c => ({ ...c })), companies: CO.map(c => ({ ...c })), hormone: H.map(x => ({ ...x })), liquid: LQ.map(x => ({ ...x })),
     settings: { expense: EXP, admin: ADM }
   };
 }
@@ -797,6 +967,7 @@ function openBackup() {
     <div class="dash" style="margin-top:12px">
       <button class="dbtn" style="background:linear-gradient(135deg,#0ba360,#3cba92)" onclick="downloadBackup()"><span class="dic">⬇️</span>ফোনে ডাউনলোড</button>
       <button class="dbtn" style="background:linear-gradient(135deg,#4285f4,#1a73e8)" onclick="driveBackup()"><span class="dic">☁️</span>গুগল ড্রাইভে আপলোড</button>
+      <button class="dbtn" style="background:linear-gradient(135deg,#8e2de2,#4a00e0)" onclick="driveSyncAll()"><span class="dic">📂</span>সব মেমো-রশিদ ড্রাইভে (কাস্টমার ফোল্ডারে)</button>
       <button class="dbtn" style="background:linear-gradient(135deg,#f7971e,#ffd200)" onclick="$('rsf').click()"><span class="dic">📥</span>রিস্টোর (নতুন তথ্য যোগ)</button>
     </div>
     <input id="rsf" type="file" accept=".json,application/json" style="display:none" onchange="restoreBackup(this)">
@@ -855,6 +1026,7 @@ async function restoreBackup(inp) {
     (data.customers || []).forEach(c => { if (!have(C, c.id)) { const { id, ...d } = c; batch.set(db.collection('customers').doc(id), d); add++; } });
     (data.companies || []).forEach(c => { if (!have(CO, c.id)) { const { id, ...d } = c; batch.set(db.collection('companies').doc(id), d); add++; } });
     (data.hormone || []).forEach(x => { if (!have(H, x.id)) { const { id, ...d } = x; batch.set(db.collection('hormone').doc(id), d); add++; } });
+    (data.liquid || []).forEach(x => { if (!have(LQ, x.id)) { const { id, ...d } = x; batch.set(db.collection('liquid').doc(id), d); add++; } });
     await batch.commit();
     const ex = (data.settings && data.settings.expense) || [];
     const newEx = ex.filter(x => !EXP.some(y => y.id === x.id));
@@ -910,6 +1082,7 @@ function renderMemoEdit() {
     <div class="row"><button onclick="meSave()">💾 সেভ করুন</button><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
 }
 function meAvail(x) {
+  if (x.lq) return 999999;
   if (x.hm) { const h = H.find(z => z.id === x.cid); return h ? (h.added || 0) - (h.sold || 0) : 0; }
   if (x.cid) return stockIn(CO.find(z => z.id === x.cid) || {}, x.n);
   return 999999;
@@ -918,7 +1091,7 @@ let MQV = '';
 function meSearch() {
   MQV = $('mq').value.trim().toLowerCase();
   const r = $('mres'); if (!r) return;
-  const L = allProds().filter(x => !!x.hm === MEDIT.hm && mP(x, MQV)).slice(0, 300);
+  const L = allProds().filter(x => !x.lq && !!x.hm === MEDIT.hm && mP(x, MQV)).slice(0, 300);
   r.innerHTML = L.map(x => `<div class="card" onclick="meAddId('${x.id}')"><div class="info"><b>${esc(x.n)}</b><small>${esc(x.w || '')}${x.co ? ' • ' + esc(x.co) : ''}${x.nk ? ' • ' + esc(x.nk) : ''} • স্টক ${num(meAvail(x))}</small></div><div class="amt">${x.p ? bn(x.p) : '<small style="color:#c62828">দাম নেই</small>'}</div></div>`).join('')
     || '<p style="color:#888">কোনো পণ্য পাওয়া যায়নি</p>';
 }
@@ -953,11 +1126,11 @@ async function meSave() {
   try {
     await db.collection('customers').doc(c.id).update({ memos, entries });
     const oldItems = m.items || [];
-    const cids = new Set([...oldItems, ...items].filter(x => x.cid && !x.hm).map(x => x.cid));
+    const cids = new Set([...oldItems, ...items].filter(x => x.cid && !x.hm && !x.lq).map(x => x.cid));
     for (const cid of cids) {
       const co = CO.find(z => z.id === cid); if (!co) continue;
       const keep = (co.sold || []).filter(x => x.memo !== MEDIT.no);
-      const add = items.filter(x => x.cid === cid && !x.hm).map(x => ({ n: x.n, w: x.w, q: x.q, tp: x.tp || 0, sp: x.p || 0, memo: MEDIT.no, d: m.date }));
+      const add = items.filter(x => x.cid === cid && !x.hm && !x.lq).map(x => ({ n: x.n, w: x.w, q: x.q, tp: x.tp || 0, sp: x.p || 0, memo: MEDIT.no, d: m.date }));
       await db.collection('companies').doc(cid).update({ sold: [...keep, ...add] });
     }
     const oldH = {}, newH = {};
@@ -965,6 +1138,8 @@ async function meSave() {
     items.filter(x => x.hm && x.cid).forEach(x => { newH[x.cid] = (newH[x.cid] || 0) + x.q; });
     const hids = new Set([...Object.keys(oldH), ...Object.keys(newH)]);
     await Promise.all([...hids].map(id => { const d = (newH[id] || 0) - (oldH[id] || 0); return d ? db.collection('hormone').doc(id).update({ sold: firebase.firestore.FieldValue.increment(d) }) : null; }).filter(Boolean));
+    { const o = lqDelta(oldItems), nw = lqDelta(items); const ids = new Set([...Object.keys(o), ...Object.keys(nw)]);
+      await Promise.all([...ids].map(id => { const d = Math.round(((nw[id] || 0) - (o[id] || 0)) * 1000) / 1000; return d ? db.collection('liquid').doc(id).update({ sold: firebase.firestore.FieldValue.increment(d) }) : null; }).filter(Boolean)); }
     $('mod').hidden = true;
     toast('মেমো আপডেট হয়েছে ✔ প্রোফাইলের হিসাব ও স্টক সমন্বয় হয়েছে');
   } catch (e) { toast('সেভ হয়নি: ' + e.code); }
@@ -1247,6 +1422,105 @@ async function addHorm() {
 }
 function delHorm(id) { if (confirm('এই হরমোন মুছবেন?')) db.collection('hormone').doc(id).delete(); }
 
+/* ===== লিকুইড পণ্য (২০ লিটার জার, খুচরা বিক্রি) ===== */
+let LQ = [], LQS = null;
+const lqLabel = ml => ml >= 1000 ? num(ml / 1000) + ' লিটার' : num(ml) + ' গ্রাম';
+const lqR3 = n => Math.round(n * 1000) / 1000;
+function lqDelta(items) {
+  const d = {};
+  (items || []).filter(x => x.lq && x.cid).forEach(x => { d[x.cid] = lqR3((d[x.cid] || 0) + (x.ml || 0) * x.q / 1000); });
+  return d;
+}
+function loadLiq() {
+  db.collection('liquid').onSnapshot(s => {
+    LQ = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
+    if ($('mod').querySelector('[data-lq]')) renderLQ();
+    if ($('vSale') && !$('vSale').hidden) rPq();
+  }, e => toast('লিকুইড লোড হয়নি: ' + e.code + ' — Firestore Rules-এ liquid যোগ করুন'));
+}
+function lqTotals() {
+  return {
+    add: LQ.reduce((a, x) => a + (x.tp || 0) * (x.added || 0), 0),
+    sold: LQ.reduce((a, x) => a + (x.sp || 0) * (x.sold || 0), 0),
+    pf: LQ.reduce((a, x) => a + ((x.sp || 0) - (x.tp || 0)) * (x.sold || 0), 0)
+  };
+}
+function openLiqSet() { $('mod').hidden = false; renderLQ(); }
+function renderLQ() {
+  const t = lqTotals();
+  $('mod').innerHTML = `<div class="box wide" data-lq="1">${setTabs('lq')}<h3 style="margin-top:0">💧 লিকুইড পণ্য ও স্টক</h3>
+    <div class="s3"><div><span>মোট ক্রয় (TP)</span><b>${bn(t.add)}</b></div><div><span>মোট বিক্রি</span><b>${bn(t.sold)}</b></div><div><span>মোট লাভ</span><b style="color:${profC(t.pf)}">${bn(t.pf)}</b></div></div>
+    <div class="panel"><h4>+ নতুন লিকুইড (জার যোগ)</h4>
+      <input id="ln" placeholder="লিকুইডের নাম"><input id="lk" placeholder="নিকনেম (যেমন abada)">
+      <div class="row"><input id="ll" type="number" inputmode="decimal" placeholder="জারে কত লিটার" value="20"><input id="lj" type="number" inputmode="numeric" placeholder="কয় জার"></div>
+      <div class="row"><input id="ltp" type="number" inputmode="decimal" placeholder="এক জারের মোট TP দাম"><input id="lsp" type="number" inputmode="decimal" placeholder="বিক্রয় মূল্য (প্রতি লিটার)"></div>
+      <button style="width:100%" onclick="addLiq()">+ যোগ করুন</button></div>
+    <div class="panel"><h4>📋 লিকুইড তালিকা</h4>
+      ${LQ.map(x => { const st = lqR3((x.added || 0) - (x.sold || 0)), pf = ((x.sp || 0) - (x.tp || 0)) * (x.sold || 0); return `<div class="ent"><div class="l"><div><b>${esc(x.n)}</b> <small>${num(x.jarL || 20)} লিটার জার</small><br><small style="color:#6b7b73">জার ${bn(x.jarTp || 0)} • লিটার TP ${bn(Math.round((x.tp || 0) * 100) / 100)} • বিক্রয় ${bn(x.sp)}/লিটার<br>স্টক ${num(st)} লিটার (${num(lqR3(st / (x.jarL || 20)))} জার) • বিক্রি ${num(lqR3(x.sold || 0))} লিটার</small></div></div><div style="text-align:right"><small>লাভ</small><br><b style="color:${profC(pf)}">${bn(Math.round(pf))}</b><br><a href="#" onclick="lqJars('${x.id}');return false">+ জার</a></div><a href="#" onclick="delLiq('${x.id}');return false">✕</a></div>`; }).join('') || '<small style="color:#888">এখনো কোনো লিকুইড নেই</small>'}
+    </div>
+    <div class="row"><button class="sec" onclick="$('mod').hidden=true">বন্ধ</button></div></div>`;
+}
+async function addLiq() {
+  const n = $('ln').value.trim(), nk = $('lk').value.trim(), jl = parseFloat(eng($('ll').value)), j = parseFloat(eng($('lj').value));
+  const jt = parseFloat(eng($('ltp').value)), sp = parseFloat(eng($('lsp').value));
+  if (!n) return toast('লিকুইডের নাম দিন');
+  if (!(jl > 0)) return toast('জারে কত লিটার দিন');
+  if (!(j > 0)) return toast('কয় জার দিন');
+  if (!(jt > 0)) return toast('এক জারের TP দাম দিন');
+  if (!(sp > 0)) return toast('প্রতি লিটারের বিক্রয় মূল্য দিন');
+  try { await db.collection('liquid').add({ n, nk, jarL: jl, jarTp: jt, tp: jt / jl, sp, jars: j, added: lqR3(jl * j), sold: 0, created: Date.now() }); toast('লিকুইড যোগ হয়েছে ✔'); }
+  catch (e) { toast('সেভ হয়নি: ' + e.code); }
+}
+async function lqJars(id) {
+  const x = LQ.find(z => z.id === id); if (!x) return;
+  const j = parseFloat(eng(prompt('কয় জার যোগ করবেন? (জারের TP আগের মতোই থাকবে)') || ''));
+  if (!(j > 0)) return;
+  try { await db.collection('liquid').doc(id).update({ added: firebase.firestore.FieldValue.increment(lqR3(j * (x.jarL || 20))), jars: firebase.firestore.FieldValue.increment(j) }); toast('জার যোগ হয়েছে ✔'); }
+  catch (e) { toast('সেভ হয়নি: ' + e.code); }
+}
+function delLiq(id) { if (confirm('এই লিকুইড মুছবেন?')) db.collection('liquid').doc(id).delete(); }
+
+/* মেমোতে লিকুইডের পরিমাণ বাছাই */
+function lqPick(pid) {
+  const x = allProds().find(z => z.id === pid); if (!x) return;
+  if (!x.p) return toast('আগে লিকুইড প্রোফাইলে বিক্রয় মূল্য সেট করুন');
+  LQS = { pid };
+  const old = document.getElementById('lqPop'); if (old) old.remove();
+  const d = document.createElement('div');
+  d.id = 'lqPop';
+  d.style.cssText = 'position:fixed;inset:0;background:#0008;z-index:99999;display:flex;align-items:center;justify-content:center;padding:14px';
+  d.onclick = e => { if (e.target === d) d.remove(); };
+  d.innerHTML = `<div style="background:#fff;border-radius:18px;padding:16px;width:100%;max-width:420px;max-height:90vh;overflow:auto">
+    <h3 style="margin:0 0 2px">💧 ${esc(x.n)}</h3>
+    <p style="margin:0 0 10px;color:#5b6b63;font-size:13px">লিটার ${bn(x.p)} • স্টক ${num(lqR3(x.stock))} লিটার</p>
+    <div class="row"><button onclick="lqQ(1000)">১ লিটার</button><button onclick="lqQ(500)">৫০০ গ্রাম</button><button onclick="lqQ(250)">২৫০ গ্রাম</button><button onclick="lqQ(100)">১০০ গ্রাম</button></div>
+    <p style="margin:10px 0 2px;font-size:13px;color:#5b6b63">অন্য পরিমাণ:</p>
+    <div class="row"><input id="lqA" type="number" inputmode="decimal" placeholder="পরিমাণ" value="1" oninput="lqCalc()"><select id="lqU" onchange="lqCalc()"><option value="L">লিটার</option><option value="G">গ্রাম</option></select></div>
+    <p style="margin:10px 0 2px;font-size:13px;color:#5b6b63">এই পরিমাণের দাম (বদলানো যাবে):</p>
+    <input id="lqP" type="number" inputmode="decimal">
+    <div class="row" style="margin-top:10px"><button onclick="lqAdd()">+ মেমোতে যোগ</button><button class="sec" onclick="document.getElementById('lqPop').remove()">বাতিল</button></div></div>`;
+  document.body.appendChild(d);
+  lqCalc();
+}
+function lqMl() { const a = parseFloat(eng($('lqA').value)) || 0; return Math.round(a * ($('lqU').value === 'L' ? 1000 : 1)); }
+function lqQ(ml) { if (ml >= 1000) { $('lqA').value = ml / 1000; $('lqU').value = 'L'; } else { $('lqA').value = ml; $('lqU').value = 'G'; } lqCalc(); }
+function lqCalc() {
+  const x = allProds().find(z => z.id === LQS.pid); if (!x) return;
+  $('lqP').value = Math.round(x.p * lqMl() / 1000) || '';
+}
+function lqAdd() {
+  const x = allProds().find(z => z.id === LQS.pid); if (!x) return;
+  const ml = lqMl(), price = parseFloat(eng($('lqP').value));
+  if (!(ml > 0)) return toast('পরিমাণ দিন');
+  if (!(price > 0)) return toast('দাম দিন');
+  const inCart = cart.filter(c => c.lq && c.cid === x.cid).reduce((a, c) => a + c.ml * c.q, 0);
+  if ((inCart + ml) / 1000 > x.stock + 1e-9) return toast('স্টকে মাত্র ' + num(lqR3(x.stock)) + ' লিটার আছে');
+  const id = 'lq|' + x.cid + '|' + ml + '|' + price, f = cart.find(c => c.id === id);
+  f ? f.q++ : cart.push({ id, cid: x.cid, lq: true, ml, hm: false, n: x.n, w: lqLabel(ml), p: price, tp: Math.round((x.tp || 0) * ml / 1000 * 100) / 100, q: 1 });
+  document.getElementById('lqPop').remove();
+  rCart(); toast(x.n + ' ' + lqLabel(ml) + ' যোগ হয়েছে');
+}
+
 /* ===== কোম্পানিকে মাল ফেরত ===== */
 function retRowsHTML() {
   const tot = RET.reduce((a, x) => a + x.q, 0), val = RET.reduce((a, x) => a + x.q * x.tp, 0);
@@ -1311,7 +1585,7 @@ let BSEL = null;
 function rBill() {
   const tot = C.reduce((a, c) => a + (c.entries || []).filter(x => x.t === 'paid' && x.rc).reduce((b, x) => b + x.a, 0), 0);
   $('vBill').innerHTML = `<div class="panel"><h4>💰 বকেয়া বিল পরিশোধ</h4>
-    <p style="margin:0 0 8px;color:#5b6b63">মোট আদায়: <b style="color:var(--grn)">${bn(tot)}</b></p>
+    <p style="margin:0 0 8px;color:#5b6b63;cursor:pointer" onclick="billPop()">মোট আদায়: <b style="color:var(--grn)">${bn(tot)}</b> <span class="tag" style="background:#e6f4ee">👆 বিস্তারিত</span></p>
     <input id="bq" type="search" placeholder="🔎 নাম, ডাকনাম বা ফোন নাম্বার" oninput="rBillRes()">
     <div id="bres"></div><div id="bform"></div></div>`;
   renderBillForm();
@@ -1324,12 +1598,25 @@ function rBillRes() {
 function pickBill(id) { BSEL = id; PREFPREV = false; $('bq').value = ''; $('bres').innerHTML = ''; renderBillForm(); }
 function renderBillForm() {
   const c = C.find(x => x.id === BSEL), f = $('bform'); if (!f) return;
-  f.innerHTML = !c ? '' : `<div class="panel" style="margin-top:10px"><h4>${esc(c.name)} — বাকি ${bn(bal(c))} • পূর্বের বছরের বাকি ${bn(alloc(c).prevRem)}</h4>
-    <div class="row"><select id="bt"><option value="cur" ${PREFPREV ? '' : 'selected'}>চলতি বাকি</option><option value="prev" ${PREFPREV ? 'selected' : ''}>পূর্বের বছরের বাকি</option></select><input id="bd" type="date" value="${today()}"><input id="ba" type="number" inputmode="decimal" placeholder="আদায়ের টাকা"></div>
+  f.innerHTML = !c ? '' : `<div class="panel" style="margin-top:10px"><h4>${esc(c.name)} — বাকি ${bn(bal(c))} • পূর্বের বছরের বাকি ${bn(alloc(c).prevRem)} • হরমোনের বাকি ${bn(alloc(c).hmRem)}</h4>
+    <div class="row"><input id="bd" type="date" value="${today()}"><input id="ba" type="number" inputmode="decimal" placeholder="আদায়ের টাকা"></div>
     <input id="bn" placeholder="নোট (ঐচ্ছিক)">
-    <div class="row"><button onclick="payBill()">🧾 রশিদ তৈরি করুন</button><button class="sec" onclick="BSEL=null;renderBillForm()">বাতিল</button></div></div>`;
+    <div class="row"><button onclick="billTypePop()">🧾 রশিদ তৈরি করুন</button><button class="sec" onclick="BSEL=null;renderBillForm()">বাতিল</button></div></div>`;
 }
-async function payBill() {
+function billTypePop() {
+  const c = C.find(x => x.id === BSEL); if (!c) return;
+  const a = parseFloat(eng($('ba').value)); if (!(a > 0)) return toast('আদায়ের টাকা দিন');
+  const al = alloc(c);
+  const opts = [['cur', '📒 চলমান বাকি পরিশোধ রশিদ', al.curRem - al.hmRem, 'linear-gradient(135deg,#f7971e,#ffb347)'],
+    ['prev', '📜 বকেয়ার পরিশোধ রশিদ', al.prevRem, 'linear-gradient(135deg,#43cea2,#185a9d)'],
+    ['hm', '🧪 হরমোনের বাকির রশিদ', al.hmRem, 'linear-gradient(135deg,#8e2de2,#4a00e0)']];
+  $('mod').hidden = false;
+  $('mod').innerHTML = `<div class="box popBox"><div class="popH">🧾 কোন বাকির রশিদ?</div>
+    <p style="text-align:center;margin:0 0 4px;color:#5b6b63">আদায়: <b>${bn(a)}</b> — একটি বেছে নিন</p>
+    ${opts.map(o => `<div class="pcardC" style="background:${o[3]};cursor:pointer" onclick="$('mod').hidden=true;payBill('${o[0]}')"><span>${o[1]}<br><small style="font-weight:400">বাকি ${bn(Math.round(o[2]))}</small></span><b>›</b></div>`).join('')}
+    <div class="row" style="margin-top:12px"><button class="sec" onclick="$('mod').hidden=true">বাতিল</button></div></div>`;
+}
+async function payBill(type) {
   const c = C.find(x => x.id === BSEL); if (!c) return;
   const a = parseFloat(eng($('ba').value)); if (!(a > 0)) return toast('আদায়ের টাকা দিন');
   const d = $('bd').value || today(), note = $('bn').value.trim();
@@ -1338,10 +1625,11 @@ async function payBill() {
     const ref = db.collection('settings').doc('receipt');
     no = await db.runTransaction(async t => { const dd = await t.get(ref), n = (dd.exists ? dd.data().n : 0) + 1; t.set(ref, { n }); return n; });
   } catch (e) { no = Date.now() % 1000000; }
-  const isPrev = $('bt').value === 'prev';
-  const entries = [...(c.entries || []), { d, t: isPrev ? 'ppaid' : 'paid', a, n: (isPrev ? 'পূর্বের বকেয়া আদায় #' : 'বিল পরিশোধ #') + num(no), rc: true, prev: isPrev, no }];
+  const isPrev = type === 'prev', isHm = type === 'hm';
+  const entries = [...(c.entries || []), { d, t: isPrev ? 'ppaid' : 'paid', a, n: (isPrev ? 'পূর্বের বকেয়া আদায় #' : isHm ? 'হরমোনের বাকি আদায় #' : 'বিল পরিশোধ #') + num(no), rc: true, prev: isPrev, hm: isHm, no }];
   try { await db.collection('customers').doc(c.id).update({ entries }); } catch (e) { return toast('সেভ হয়নি: ' + e.code); }
-  printDoc(receiptHTML({ no, d, a, note, prev: isPrev, bal: isPrev ? alloc({ entries }).prevRem : alloc({ entries }).curRem, c: { n: c.name, ph: c.phone, a: c.address } }), 'রশিদ-' + num(no));
+  const al2 = alloc({ entries, memos: c.memos });
+  printDoc(receiptHTML({ no, d, a, note, prev: isPrev, hm: isHm, bal: isPrev ? al2.prevRem : isHm ? al2.hmRem : al2.curRem - al2.hmRem, c: { n: c.name, ph: c.phone, a: c.address } }), 'রশিদ-' + num(no));
   PREFPREV = false;
   BSEL = null; toast('রশিদ তৈরি হয়েছে ✔');
 }
@@ -1352,8 +1640,8 @@ function receiptHTML(r) {
   <h3 style="text-align:center;margin:10px 0;border:1px solid #888;border-radius:6px;padding:4px">বকেয়া বিল আদায়ের রশিদ</h3>
   ${trow('রশিদ নং: ' + num(r.no), 'তারিখ: ' + bd(r.d))}
   <p style="margin:10px 0;font-size:15px">কাস্টমারের নাম: <b>${esc(r.c.n)}</b><br>মোবাইল: ${esc(r.c.ph)}<br>ঠিকানা: ${esc(r.c.a)}</p>
-  <table class="mt"><tr><th>বিবরণ</th><th>আদায় (টাকা)</th></tr><tr><td>${r.prev ? 'পূর্বের বছরের বাকি পরিশোধ' : 'বকেয়া বিল পরিশোধ'}${r.note ? ' — ' + esc(r.note) : ''}</td><td>${bn(r.a)}</td></tr></table>
-  <div style="margin-top:8px">${trow(r.prev ? 'অবশিষ্ট পূর্বের বছরের বাকি' : 'অবশিষ্ট বাকি', bn(r.bal), 1)}</div>
+  <table class="mt"><tr><th>বিবরণ</th><th>আদায় (টাকা)</th></tr><tr><td>${r.prev ? 'পূর্বের বছরের বাকি পরিশোধ' : r.hm ? 'হরমোনের বাকি পরিশোধ' : 'চলমান বাকি পরিশোধ'}${r.note ? ' — ' + esc(r.note) : ''}</td><td>${bn(r.a)}</td></tr></table>
+  <div style="margin-top:8px">${trow(r.prev ? 'অবশিষ্ট পূর্বের বছরের বাকি' : r.hm ? 'অবশিষ্ট হরমোনের বাকি' : 'অবশিষ্ট চলমান বাকি', bn(r.bal), 1)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:40px;align-items:flex-end;gap:10px">
     <div style="text-align:center;width:45%;border-top:1px solid #444;padding-top:4px">কাস্টমারের স্বাক্ষর</div>
     <div style="text-align:center;width:45%;height:90px;border:1px dashed #888;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px">প্রতিষ্ঠানের শীল ও স্বাক্ষর</div>
@@ -1371,7 +1659,7 @@ function memoHTML(m) {
   ${trow('মেমো নং: ' + (m.no ? num(m.no) : 'সেভের পর'), 'তারিখ: ' + bd(m.date))}
   <p style="margin:6px 0;font-size:14px"><b>${esc(m.c.n)}</b><br>${esc(m.c.ph)} • ${esc(m.c.a)}</p>
   <table class="mt"><tr><th>ক্রম</th><th>পণ্য</th>${W ? '<th>ওজন</th>' : ''}<th>দাম</th><th>পরিমাণ</th><th>মোট</th></tr>
-  ${m.items.map((x, i) => `<tr><td>${num(i + 1)}</td><td>${esc(x.n)}</td>${W ? `<td>${esc(x.w)}</td>` : ''}<td>${num(x.p)}</td><td>${num(x.q)}</td><td>${num(x.p * x.q)}</td></tr>`).join('')}</table>
+  ${m.items.map((x, i) => `<tr><td>${num(i + 1)}</td><td>${esc(x.n)}${x.lq && !W ? ' (' + esc(x.w) + ')' : ''}</td>${W ? `<td>${esc(x.w)}</td>` : ''}<td>${num(x.p)}</td><td>${num(x.q)}</td><td>${num(x.p * x.q)}</td></tr>`).join('')}</table>
   <div style="margin-top:6px">${m.dAmt ? trow('মোট', bn(m.sub)) + trow('ছাড় ' + num(m.dp) + '%', '- ' + bn(m.dAmt)) : ''}${trow('সর্বমোট', bn(m.total), 1)}
   ${m.cash ? trow('পরিশোধ', 'নগদ') : ''}${!MT.showDue ? '' : m.added ? trow('পূর্বের বকেয়া', bn(m.prev)) + trow('মোট বকেয়া', bn(m.after), 1) : trow('নগদ বিক্রয়', 'বকেয়ায় যোগ হয়নি')}</div>
   ${MT.note ? `<p style="text-align:center;font-size:12px;margin:14px 0 0">${esc(MT.note)}</p>` : ''}`;
@@ -1386,7 +1674,7 @@ function buildMemo(isCash) {
   const c = C.find(x => x.id === selC);
   if (!c) return toast('কাস্টমার পাওয়া যায়নি');
   const sub = cTot(), dp = DSC || 0, dAmt = Math.round(sub * dp / 100), t = sub - dAmt;
-  showMemo({ no: 0, date: today(), cid: c.id, c: { n: c.name, ph: c.phone, a: c.address }, items: cart.map(x => ({ n: x.n, w: x.w, p: x.p, tp: x.tp || 0, q: x.q, cid: x.cid || null, hm: !!x.hm })), total: t, sub, dp, dAmt, added: !isCash, cash: isCash, hm: HM, prev: bal(c), after: isCash ? bal(c) : bal(c) + t }, false);
+  showMemo({ no: 0, date: today(), cid: c.id, c: { n: c.name, ph: c.phone, a: c.address }, items: cart.map(x => ({ n: x.n, w: x.w, p: x.p, tp: x.tp || 0, q: x.q, cid: x.cid || null, hm: !!x.hm, lq: !!x.lq, ml: x.ml || 0 })), total: t, sub, dp, dAmt, added: !isCash, cash: isCash, hm: HM, prev: bal(c), after: isCash ? bal(c) : bal(c) + t }, false);
 }
 function showMemo(m, saved) {
   MM = m; $('mod').hidden = false;
@@ -1406,9 +1694,11 @@ async function saveMemo(pr) {
     await db.collection('customers').doc(c.id).update({ entries, memos: [...(c.memos || []), m] });
   } catch (e) { return toast('সেভ হয়নি: ' + e.code); }
   const byC = {};
-  (m.items || []).forEach(x => { if (x.cid && !x.hm) (byC[x.cid] = byC[x.cid] || []).push({ n: x.n, w: x.w, q: x.q, tp: x.tp || 0, sp: x.p || 0, memo: m.no, d: m.date }); });
+  (m.items || []).forEach(x => { if (x.cid && !x.hm && !x.lq) (byC[x.cid] = byC[x.cid] || []).push({ n: x.n, w: x.w, q: x.q, tp: x.tp || 0, sp: x.p || 0, memo: m.no, d: m.date }); });
   try { await Promise.all(Object.keys(byC).map(id => db.collection('companies').doc(id).update({ sold: firebase.firestore.FieldValue.arrayUnion(...byC[id]) }))); }
   catch (e) { toast('স্টক আপডেট হয়নি: ' + e.code); }
+  const lqD = lqDelta(m.items || []);
+  if (Object.keys(lqD).length) { try { await Promise.all(Object.keys(lqD).map(id => db.collection('liquid').doc(id).update({ sold: firebase.firestore.FieldValue.increment(lqD[id]) }))); } catch (e) { toast('লিকুইড স্টক আপডেট হয়নি: ' + e.code); } }
   const hmItems = (m.items || []).filter(x => x.hm);
   if (hmItems.length) { try { await Promise.all(hmItems.map(x => db.collection('hormone').doc(x.cid).update({ sold: firebase.firestore.FieldValue.increment(x.q) }))); } catch (e) { toast('হরমোন স্টক আপডেট হয়নি: ' + e.code); } }
   cart = []; DSC = 0; rCart(); toast('মেমো সেভ হয়েছে ✔ স্টক থেকে পণ্য কমেছে');
@@ -1427,6 +1717,47 @@ const cSumP = c => effPurch(c).reduce((a, x) => a + x.tp * x.eq, 0);
 const cSumS = c => (c.sold || []).reduce((a, x) => a + (x.sp || 0) * x.q, 0);
 const cQty = c => (c.purchases || []).reduce((a, x) => a + x.q, 0);
 const cProf = c => (c.sold || []).reduce((a, x) => a + ((x.sp || 0) - (x.tp || 0)) * x.q, 0);
+const cSoldTP = c => (c.sold || []).reduce((a, x) => a + (x.tp || 0) * x.q, 0);
+const cPot = c => effPurch(c).reduce((a, x) => a + ((x.sp || 0) - (x.tp || 0)) * x.eq, 0);
+function tpPop(id) {
+  const list = id === 'all' ? CO : CO.filter(x => x.id === id);
+  if (!list.length) return;
+  const one = id !== 'all';
+  const th = 'padding:6px 4px;border-bottom:1px solid #e3ece7;text-align:right';
+  let rows, TP = 0, SPV = 0, POT = 0, EARN = 0;
+  if (one) {
+    const c = list[0];
+    const m = {};
+    effPurch(c).filter(x => x.eq > 0).forEach(x => { const k = x.n + '|' + (x.w || ''); const r = m[k] = m[k] || { n: x.n + ' ' + (x.w || ''), q: 0, tp: 0, sp: 0 }; r.q += x.eq; r.tp += x.tp * x.eq; r.sp += (x.sp || 0) * x.eq; });
+    rows = Object.values(m).map(r => { TP += r.tp; SPV += r.sp; return [esc(r.n) + ' × ' + num(r.q), r.tp, r.sp, r.sp - r.tp]; });
+    EARN = cProf(c);
+  } else {
+    rows = list.map(c => { const tp = cSumP(c), sp = effPurch(c).reduce((a, x) => a + (x.sp || 0) * x.eq, 0); TP += tp; SPV += sp; EARN += cProf(c); return [esc(c.name), tp, sp, sp - tp]; });
+    const hS = H.reduce((a, x) => a + (x.sp || 0) * (x.added || 0), 0), lS = LQ.reduce((a, x) => a + (x.sp || 0) * (x.added || 0), 0), hT = hmTotals(), lT = lqTotals();
+    [['🧪 হরমোন', hT, hS], ['💧 লিকুইড', lT, lS]].forEach(([n, t, sv]) => { const tp = Math.round(t.add), sp = Math.round(sv); TP += tp; SPV += sp; EARN += t.pf; rows.push([n, tp, sp, sp - tp]); });
+  }
+  POT = SPV - TP;
+  const old = document.getElementById('tpPop'); if (old) old.remove();
+  const d = document.createElement('div');
+  d.id = 'tpPop';
+  d.style.cssText = 'position:fixed;inset:0;background:#0008;z-index:99999;display:flex;align-items:center;justify-content:center;padding:14px';
+  d.onclick = e => { if (e.target === d) d.remove(); };
+  d.innerHTML = `<div style="background:#fff;border-radius:18px;padding:16px;width:100%;max-width:480px;max-height:85vh;overflow:auto">
+    <h3 style="margin:0 0 4px">📊 মোট TP রেটের পণ্য বিক্রি হলে</h3>
+    <p style="margin:0 0 10px;color:#5b6b63;font-size:13px">ক্রয় করা সব পণ্য (ফেরত বাদে) বিক্রয় মূল্যে বিক্রি হলে কত লাভ হবে</p>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr><th style="${th};text-align:left">${one ? 'পণ্য' : 'কোম্পানি'}</th><th style="${th}">TP</th><th style="${th}">বিক্রয়</th><th style="${th}">লাভ</th></tr>
+      ${rows.map(r => `<tr><td style="${th};text-align:left">${r[0]}</td><td style="${th}">${num(r[1])}</td><td style="${th}">${num(r[2])}</td><td style="${th};color:${profC(r[3])}">${num(r[3])}</td></tr>`).join('') || `<tr><td colspan="4" style="${th};text-align:center;color:#888">কোনো ক্রয় নেই</td></tr>`}
+      <tr style="font-weight:700"><td style="${th};text-align:left">মোট</td><td style="${th}">${num(TP)}</td><td style="${th}">${num(SPV)}</td><td style="${th};color:${profC(POT)}">${num(POT)}</td></tr>
+    </table></div>
+    <div style="margin-top:12px;padding:10px;border-radius:12px;background:#eefcf6;line-height:1.9">
+      <div>✅ সব পণ্য বিক্রি হলে মোট লাভ: <b style="color:${profC(POT)}">${bn(POT)}</b></div>
+      <div>💰 এ পর্যন্ত বিক্রি থেকে লাভ হয়েছে: <b style="color:${profC(EARN)}">${bn(EARN)}</b></div>
+      <div>📦 বাকি স্টক বিক্রি হলে আরও লাভ: <b style="color:${profC(POT - EARN)}">${bn(POT - EARN)}</b></div>
+    </div>
+    <button style="width:100%;margin-top:12px" onclick="document.getElementById('tpPop').remove()">বন্ধ</button></div>`;
+  document.body.appendChild(d);
+}
 const sKey = (n, w) => (n + ' ' + (w || '')).trim();
 const soldOf = (c, n) => (c.sold || []).filter(z => z.n === n).reduce((a, z) => a + z.q, 0);
 const stockIn = (c, n) => (c.purchases || []).filter(x => x.n === n).reduce((a, x) => a + x.q, 0) - (c.sold || []).filter(x => x.n === n).reduce((a, x) => a + x.q, 0) - (c.returned || []).filter(x => x.n === n).reduce((a, x) => a + x.q, 0);
@@ -1456,14 +1787,15 @@ function renderCV() {
   $('mod').innerHTML = `<div class="box wide" data-comp="1">${setTabs('comp')}${c ? compProfHTML(c) : compListHTML()}</div>`;
 }
 function compListHTML() {
-  const T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP), SS = T(cSumS);
+  const X = extraTot(), T = k => CO.reduce((a, c) => a + k(c), 0), SP = T(cSumP) + X.add, SS = T(cSumS) + X.sold, STP = T(cSoldTP) + (X.sold - X.pf), SL = T(cProf) + X.pf;
   return `<h3 style="margin-top:0">🏭 কোম্পানি ও স্টক</h3>
   <div class="panel"><h4>💰 প্রফিট সারাংশ (সব কোম্পানি)</h4>
     <div class="s3" style="margin:0">
-      <div><span>মোট ক্রয় (TP)</span><b>${bn(SP)}</b></div>
-      <div><span>মোট বিক্রয় মূল্য</span><b>${bn(SS)}</b></div>
-      <div><span>মোট লাভ</span><b style="color:${profC(SS - SP)}">${bn(SS - SP)}</b></div>
+      <div onclick="tpPop('all')" style="cursor:pointer"><span>মোট ক্রয় (TP)</span><b>${bn(SP)}</b><span style="font-size:11px;color:var(--g2)">👆 বিস্তারিত</span></div>
+      <div><span>মোট বিক্রয় মূল্য</span><b>${bn(SS)}</b><span style="font-size:11px">(বিক্রিত পণ্যের TP ${bn(STP)})</span></div>
+      <div><span>মোট লাভ</span><b style="color:${profC(SL)}">${bn(SL)}</b></div>
     </div></div>
+  ${allProfitHTML()}
   <div class="panel"><h4>+ নতুন কোম্পানি প্রোফাইল</h4>
     <input id="co1" placeholder="কোম্পানির নাম"><input id="co2" type="tel" placeholder="মোবাইল (ঐচ্ছিক)"><input id="co3" placeholder="ঠিকানা (ঐচ্ছিক)">
     <button style="width:100%;margin-top:6px" onclick="saveNewComp()">সেভ করুন</button></div>
@@ -1484,7 +1816,7 @@ function compProfHTML(c) {
   return `<button class="back" onclick="CV='list';renderCV()">← কোম্পানির তালিকা</button>
   <div class="pcard"><div><h2>${esc(c.name)}</h2>${c.phone ? `<p>📞 ${esc(c.phone)}</p>` : ''}${c.address ? `<p>📍 ${esc(c.address)}</p>` : ''}</div></div>
   <div class="s3">
-    <div><span>ক্রয়ের মোট TP মূল্য</span><b>${bn(P_)}</b></div>
+    <div onclick="tpPop('${c.id}')" style="cursor:pointer"><span>ক্রয়ের মোট TP মূল্য</span><b>${bn(P_)}</b><span style="font-size:11px;color:var(--g2)">👆 বিস্তারিত</span></div>
     <div><span>বিক্রিত পণ্যের বিক্রয় মূল্য</span><b>${bn(S_)}</b></div>
     <div><span>লাভ (বিক্রি থেকে)</span><b style="color:${profC(cProf(c))}">${bn(cProf(c))}</b></div>
   </div>
@@ -1505,7 +1837,7 @@ function compProfHTML(c) {
     <button style="width:100%" onclick="addPurchase()">+ ক্রয় যোগ করুন</button>
     <div style="overflow-x:auto;margin-top:10px"><table class="mt"><tr><th>তারিখ</th><th>পণ্য</th><th>TP</th><th>বিক্রয়</th><th>পরিমাণ</th><th>ক্রয় মূল্য</th><th>লাভ</th><th>মোট বিক্রয়</th><th></th></tr>
     ${EP.filter(x => x.eq > 0).map((x) => `<tr><td>${bd(x.d)}</td><td>${esc(x.n)} ${esc(x.w)}</td><td>${num(x.tp)}</td><td>${num(x.sp)}</td><td>${num(x.eq)}</td><td>${num(x.tp * x.eq)}</td><td style="color:${profC(x.sp - x.tp)}">${num((x.sp - x.tp) * x.eq)}</td><td>${num(x.sp * x.eq)}</td><td><a href="#" onclick="delPurchase(${x.oi});return false">✕</a></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:#888">কোনো ক্রয় নেই</td></tr>'}
-    <tr><th colspan="5" style="text-align:right">মোট</th><th>${num(P_)}</th><th style="color:${profC(S_ - P_)}">${num(S_ - P_)}</th><th>${num(PSV)}</th><th></th></tr></table></div>
+    <tr><th colspan="5" style="text-align:right">মোট</th><th>${num(P_)}</th><th style="color:${profC(cPot(c))}">${num(cPot(c))}</th><th>${num(PSV)}</th><th></th></tr></table></div>
   </div>
   <div class="panel"><h4>🔁 স্টক থেকে কোম্পানিকে মাল ফেরত</h4>
     <input id="rn" list="stl" placeholder="পণ্যের নাম">
@@ -1598,6 +1930,7 @@ async function delMemo(no) {
     await db.collection('customers').doc(cid).update({ entries, memos: (c.memos || []).filter(z => z.no !== no) });
     await Promise.all(CO.filter(co => (co.sold || []).some(x => x.memo === no))
       .map(co => db.collection('companies').doc(co.id).update({ sold: co.sold.filter(x => x.memo !== no) })));
+    if (memo) { const d = lqDelta(memo.items || []); await Promise.all(Object.keys(d).map(id => db.collection('liquid').doc(id).update({ sold: firebase.firestore.FieldValue.increment(-d[id]) }))); }
     if (memo && memo.hm) await Promise.all((memo.items || []).filter(x => x.hm).map(x => db.collection('hormone').doc(x.cid).update({ sold: firebase.firestore.FieldValue.increment(-x.q) })));
   } catch (e) { return toast('মুছতে সমস্যা: ' + e.code); }
   $('mod').hidden = true; toast('মেমো মুছে গেছে, বকেয়া ও স্টক ফিরেছে ✔');
